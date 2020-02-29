@@ -1,5 +1,9 @@
 %{
   #include<stdio.h>
+  #include "lex.yy.c"
+
+void yyerror(char const *msg){
+}
 %}
 
 %union {
@@ -18,4 +22,3 @@ Calc: ;
 
 %%
 
-#include "lex.yy.c"

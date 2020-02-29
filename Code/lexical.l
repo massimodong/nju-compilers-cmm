@@ -51,20 +51,19 @@ WHILE   while
 
 %%
 
-{WS}      {printf("fount WS %s\n", yytext);}
+{WS}      {}
 {CMS}     {
   int l = '\0', c = input();
   while(!((l == '*') && (c == '/'))){
     if(c == EOF || c == 0){
-      perror("END OF FILE");
-      return 0;
+      //TODO: error
+      break;
     }
     l = c;
     c = input();
   }
-  printf("found CMS\n");
 }
-{INT}     {printf("found INT %s\n", yytext);}
+{INT}     {yylval.type_int = 1; return INT;}
 {FLOAT}   {printf("found FLOAT %s\n", yytext);}
 {SEMI}    {printf("found SEMI %s\n", yytext);}
 {ASSIGNOP}  {printf("found ASSIGNOP %s\n", yytext);}
