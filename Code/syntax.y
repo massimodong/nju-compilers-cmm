@@ -3,6 +3,7 @@
   #include "lex.yy.c"
 
 void yyerror(char const *msg){
+  printf("error: %s\n", msg);
 }
 %}
 
@@ -18,7 +19,18 @@ void yyerror(char const *msg){
 
 %%
 
-Calc: ;
+Program: ExtDefList;
+
+ExtDefList: ExtDef ExtDefList
+  | ;
+ExtDef: Specifier ExtDecList SEMI;
+
+Specifier: TYPE;
+
+ExtDecList: VarDec
+  | VarDec COMMA ExtDecList;
+
+VarDec: ID;
 
 %%
 
