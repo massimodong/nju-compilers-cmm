@@ -1,0 +1,7 @@
+README
+parser
+*.o
+lex.yy.c
+syntax.output
+syntax.tab.c
+syntax.tab.h
