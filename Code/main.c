@@ -1,4 +1,9 @@
 #include <stdio.h>
+#include "common.h"
+
+void yyrestart (FILE *input_file);
+int yyparse (void);
+
 int main(int argc, char** argv){
   if (argc <= 1) return 1;
   FILE* f = fopen(argv[1], "r");

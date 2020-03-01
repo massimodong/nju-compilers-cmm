@@ -1,19 +1,17 @@
 %{
-  #include<stdio.h>
-  #include "lex.yy.c"
+  #include <stdio.h>
+  #include "common.h"
 
-void yyerror(char const *msg){
-  printf("error: %s\n", msg);
-}
+  #define YYSTYPE Tree
+
+  int yylex (void);
+  void yyerror(char const *msg){
+    printf("error: %s\n", msg);
+  }
 %}
 
-%union {
-  int type_int;
-  float type_float;
-}
-
-%token <type_int> INT
-%token <type_float> FLOAT
+%token INT
+%token FLOAT
 %token ID SEMI COMMA ASSIGNOP RELOP PLUS MINUS STAR DIV AND OR DOT NOT TYPE LP RP LB RB LC RC STRUCT RETURN IF ELSE WHILE
 
 
@@ -106,4 +104,4 @@ Args: Exp
 ;
 
 %%
-
+#include "lex.yy.c"

@@ -63,10 +63,10 @@ WHILE   while
     c = input();
   }
 }
-{INT_DEC}     {yylval.type_int = strtol(yytext, NULL, 10); return INT;}
-{INT_OCT}     {yylval.type_int = strtol(yytext, NULL, 8); return INT;}
-{INT_HEX}     {yylval.type_int = strtol(yytext, NULL, 16); return INT;}
-{FLOAT}       {yylval.type_float = strtof(yytext, NULL); return FLOAT;}
+{INT_DEC}     {yylval.int_val = strtol(yytext, NULL, 10); return INT;}
+{INT_OCT}     {yylval.int_val = strtol(yytext, NULL, 8); return INT;}
+{INT_HEX}     {yylval.int_val = strtol(yytext, NULL, 16); return INT;}
+{FLOAT}       {yylval.float_val = strtof(yytext, NULL); return FLOAT;}
 {SEMI}        {return SEMI;}
 {ASSIGNOP}    {return ASSIGNOP;}
 {RELOP}       {return RELOP;}
@@ -90,7 +90,7 @@ WHILE   while
 {IF}          {return IF;}
 {ELSE}        {return ELSE;}
 {WHILE}       {return WHILE;}
-{ID}          {yylval.type_int = installID(); return ID;}
+{ID}          {yylval.int_val = installID(); return ID;}
 
 .             {printf("Error: unrecognized %s\n", yytext);}
 
