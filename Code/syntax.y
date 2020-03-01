@@ -5,6 +5,8 @@
   #define YYSTYPE Tree
 
   int yylex (void);
+  void treeInit(Tree *);
+  void treeDfs(Tree *, int, int);
   void yyerror(char const *msg){
     printf("error: %s\n", msg);
   }
@@ -17,15 +19,32 @@
 
 %%
 
-Program: ExtDefList
+Program: ExtDefList {treeInit(&$$); $$.ch[0] = &$1; treeDfs(&$$, Program, 0);}
 ;
 
-ExtDefList: ExtDef ExtDefList
-  |
+ExtDefList: ExtDef ExtDefList {treeInit(&$$); $$.ch[0] = &$1; $$.ch[1] = &$2;}
+  | {treeInit(&$$);}
 ;
-ExtDef: Specifier ExtDecList SEMI
-  | Specifier SEMI
-  | Specifier FunDec CompSt
+ExtDef: Specifier ExtDecList SEMI {
+  treeInit(&$$);
+  $$.int_val = ExtDef_Val;
+  $$.ch[0] = &$1;
+  $$.ch[1] = &$2;
+  $$.ch[2] = &$3;
+}
+  | Specifier SEMI {
+  treeInit(&$$);
+  $$.int_val = ExtDef_Val;
+  $$.ch[0] = &$1;
+  $$.ch[2] = &$2;
+}
+  | Specifier FunDec CompSt {
+  treeInit(&$$);
+  $$.int_val = ExtDef_Func;
+  $$.ch[0] = &$1;
+  $$.ch[1] = &$2;
+  $$.ch[2] = &$3;
+}
 ;
 ExtDecList: VarDec
   | VarDec COMMA ExtDecList
