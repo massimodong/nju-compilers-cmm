@@ -6,7 +6,7 @@
 
   int yylex (void);
   void treeInit(Tree **, int);
-  void treeDfs(Tree *, int, int);
+  void treePrint(Tree *);
   void yyerror(char const *msg){
     printf("error: %s\n", msg);
   }
@@ -21,7 +21,7 @@
 
 %%
 
-Program: ExtDefList {treeInit(&$$, Program); $$->ch[0] = $1; treeDfs($$, Program, 0);}
+Program: ExtDefList {treeInit(&$$, Program); $$->ch[0] = $1; treePrint($$);}
 ;
 
 ExtDefList: ExtDef ExtDefList {treeInit(&$$, ExtDefList); $$->ch[0] = $1; $$->ch[1] = $2;}

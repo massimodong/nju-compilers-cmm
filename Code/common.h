@@ -1,7 +1,7 @@
 #define MAXCH 10
 
 typedef struct __Tree{
-  int stype;
+  int stype, show;
   struct __Tree *ch[MAXCH];
   union{
     int int_val;
