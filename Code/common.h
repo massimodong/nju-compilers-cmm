@@ -1,6 +1,7 @@
 #define MAXCH 10
 
 typedef struct __Tree{
+  int stype;
   struct __Tree *ch[MAXCH];
   union{
     int int_val;
@@ -8,9 +9,44 @@ typedef struct __Tree{
   };
 }Tree;
 
+typedef Tree *Treep;
+
 enum{
-  Program,
-  ExtDef,
   ExtDef_Val,
   ExtDef_Func,
+};
+
+#define Syntaxes(ACTION)\
+  ACTION(Program)\
+  ACTION(ExtDefList)\
+  ACTION(ExtDef)\
+  ACTION(ExtDecList)\
+  ACTION(Specifier)\
+  ACTION(StructSpecifier)\
+  ACTION(OptTag)\
+  ACTION(Tag)\
+  ACTION(VarDec)\
+  ACTION(FuncDec)\
+  ACTION(VarList)\
+  ACTION(ParamDec)\
+  ACTION(CompSt)\
+  ACTION(StmtList)\
+  ACTION(Stmt)\
+  ACTION(DefList)\
+  ACTION(Def)\
+  ACTION(DecList)\
+  ACTION(Dec)\
+  ACTION(Exp)\
+  ACTION(Args)\
+
+
+#define GENERATE_ENUM(e) e,
+#define GENERATE_STRING(s) #s,
+
+enum{
+  Syntaxes(GENERATE_ENUM)
+};
+
+static const char *syntaxName[] = {
+  Syntaxes(GENERATE_STRING)
 };

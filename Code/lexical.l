@@ -63,34 +63,34 @@ WHILE   while
     c = input();
   }
 }
-{INT_DEC}     {yylval.int_val = strtol(yytext, NULL, 10); return INT;}
-{INT_OCT}     {yylval.int_val = strtol(yytext, NULL, 8); return INT;}
-{INT_HEX}     {yylval.int_val = strtol(yytext, NULL, 16); return INT;}
-{FLOAT}       {yylval.float_val = strtof(yytext, NULL); return FLOAT;}
-{SEMI}        {return SEMI;}
-{ASSIGNOP}    {return ASSIGNOP;}
-{RELOP}       {return RELOP;}
-{PLUS}        {return PLUS;}
-{MINUS}       {return MINUS;}
-{STAR}        {return STAR;}
-{DIV}         {return DIV;}
-{AND}         {return AND;}
-{OR}          {return OR;}
-{DOT}         {return DOT;}
-{NOT}         {return NOT;}
-{TYPE}        {return TYPE;}
-{LP}          {return LP;}
-{RP}          {return RP;}
-{LB}          {return LB;}
-{RB}          {return RB;}
-{LC}          {return LC;}
-{RC}          {return RC;}
-{STRUCT}      {return STRUCT;}
-{RETURN}      {return RETURN;}
-{IF}          {return IF;}
-{ELSE}        {return ELSE;}
-{WHILE}       {return WHILE;}
-{ID}          {yylval.int_val = installID(); return ID;}
+{INT_DEC}     {treeInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 10); return INT;}
+{INT_OCT}     {treeInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 8); return INT;}
+{INT_HEX}     {treeInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 16); return INT;}
+{FLOAT}       {treeInit(&yylval, INT); yylval->float_val = strtof(yytext, NULL); return FLOAT;}
+{SEMI}        {treeInit(&yylval, INT); return SEMI;}
+{ASSIGNOP}    {treeInit(&yylval, INT); return ASSIGNOP;}
+{RELOP}       {treeInit(&yylval, INT); return RELOP;}
+{PLUS}        {treeInit(&yylval, INT); return PLUS;}
+{MINUS}       {treeInit(&yylval, INT); return MINUS;}
+{STAR}        {treeInit(&yylval, INT); return STAR;}
+{DIV}         {treeInit(&yylval, INT); return DIV;}
+{AND}         {treeInit(&yylval, INT); return AND;}
+{OR}          {treeInit(&yylval, INT); return OR;}
+{DOT}         {treeInit(&yylval, INT); return DOT;}
+{NOT}         {treeInit(&yylval, INT); return NOT;}
+{TYPE}        {treeInit(&yylval, INT); return TYPE;}
+{LP}          {treeInit(&yylval, INT); return LP;}
+{RP}          {treeInit(&yylval, INT); return RP;}
+{LB}          {treeInit(&yylval, INT); return LB;}
+{RB}          {treeInit(&yylval, INT); return RB;}
+{LC}          {treeInit(&yylval, INT); return LC;}
+{RC}          {treeInit(&yylval, INT); return RC;}
+{STRUCT}      {treeInit(&yylval, INT); return STRUCT;}
+{RETURN}      {treeInit(&yylval, INT); return RETURN;}
+{IF}          {treeInit(&yylval, INT); return IF;}
+{ELSE}        {treeInit(&yylval, INT); return ELSE;}
+{WHILE}       {treeInit(&yylval, INT); return WHILE;}
+{ID}          {treeInit(&yylval, INT); yylval->int_val = installID(); return ID;}
 
 .             {printf("Error: unrecognized %s\n", yytext);}
 
