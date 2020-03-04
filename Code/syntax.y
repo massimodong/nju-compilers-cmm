@@ -7,9 +7,7 @@
   int yylex (void);
   void treeInit(Tree **, int);
   void treePrint(Tree *);
-  void yyerror(char const *msg){
-    printf("error: %s\n", msg);
-  }
+  void yyerror(char const *);
 %}
 
 %token INT
@@ -118,7 +116,7 @@ VarDec: ID{
   $$->int_val = 0;
   $$->ch[0] = $1;
 }
-  | VarDec LB INT LB{
+  | VarDec LB INT RB{
   treeInit(&$$, VarDec);
   $$->int_val = 1;
   $$->ch[0] = $1;
@@ -267,28 +265,142 @@ Dec: VarDec{
 }
 ;
 
-Exp: Exp ASSIGNOP Exp
-  | Exp AND Exp
-  | Exp OR Exp
-  | Exp RELOP Exp
-  | Exp PLUS Exp
-  | Exp MINUS Exp
-  | Exp STAR Exp
-  | Exp DIV Exp
-  | LP Exp RP
-  | MINUS Exp
-  | NOT Exp
-  | ID LP Args RP
-  | ID LP RP
-  | Exp LB Exp RB
-  | Exp DOT ID
-  | ID
-  | INT
-  | FLOAT
+Exp: Exp ASSIGNOP Exp{
+  treeInit(&$$, Exp);
+  $$->int_val = 0;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+}
+  | Exp AND Exp{
+  treeInit(&$$, Exp);
+  $$->int_val = 0;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+}
+  | Exp OR Exp{
+  treeInit(&$$, Exp);
+  $$->int_val = 0;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+}
+  | Exp RELOP Exp{
+  treeInit(&$$, Exp);
+  $$->int_val = 0;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+}
+  | Exp PLUS Exp{
+  treeInit(&$$, Exp);
+  $$->int_val = 0;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+}
+  | Exp MINUS Exp{
+  treeInit(&$$, Exp);
+  $$->int_val = 0;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+}
+  | Exp STAR Exp{
+  treeInit(&$$, Exp);
+  $$->int_val = 0;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+}
+  | Exp DIV Exp{
+  treeInit(&$$, Exp);
+  $$->int_val = 0;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+}
+  | LP Exp RP{
+  treeInit(&$$, Exp);
+  $$->int_val = 1;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+}
+  | MINUS Exp{
+  treeInit(&$$, Exp);
+  $$->int_val = 2;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+}
+  | NOT Exp{
+  treeInit(&$$, Exp);
+  $$->int_val = 2;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+}
+  | ID LP Args RP{
+  treeInit(&$$, Exp);
+  $$->int_val = 3;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+  $$->ch[3] = $4;
+}
+  | ID LP RP{
+  treeInit(&$$, Exp);
+  $$->int_val = 3;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[3] = $3;
+}
+  | Exp LB Exp RB{
+  treeInit(&$$, Exp);
+  $$->int_val = 4;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+  $$->ch[3] = $4;
+}
+  | Exp DOT ID{
+  treeInit(&$$, Exp);
+  $$->int_val = 5;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+}
+  | ID{
+  treeInit(&$$, Exp);
+  $$->int_val = 6;
+  $$->ch[0] = $1;
+}
+  | INT{
+  treeInit(&$$, Exp);
+  $$->int_val = 7;
+  $$->ch[0] = $1;
+}
+  | FLOAT{
+  treeInit(&$$, Exp);
+  $$->int_val = 7;
+  $$->ch[0] = $1;
+}
 ;
-Args: Exp
-  | Exp COMMA Args
+Args: Exp{
+  treeInit(&$$, Args);
+  $$->ch[0] = $1;
+}
+  | Exp COMMA Args{
+  treeInit(&$$, Args);
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+}
 ;
 
 %%
 #include "lex.yy.c"
+void yyerror(char const *msg){
+  printf("error: %s at line %d\n", msg, yylineno);
+}
+

@@ -71,6 +71,7 @@ WHILE   while
 {INT_HEX}     {tokenInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 16); return INT;}
 {FLOAT}       {tokenInit(&yylval, FLOAT); yylval->float_val = strtof(yytext, NULL); return FLOAT;}
 {SEMI}        {tokenInit(&yylval, SEMI); return SEMI;}
+{COMMA}       {tokenInit(&yylval, COMMA); return COMMA;}
 {ASSIGNOP}    {tokenInit(&yylval, ASSIGNOP); return ASSIGNOP;}
 {RELOP}       {tokenInit(&yylval, RELOP); return RELOP;}
 {PLUS}        {tokenInit(&yylval, PLUS); return PLUS;}
@@ -95,7 +96,7 @@ WHILE   while
 {WHILE}       {tokenInit(&yylval, WHILE); return WHILE;}
 {ID}          {tokenInit(&yylval, ID); yylval->int_val = installID(); return ID;}
 
-.             {printf("Error: unrecognized %s\n", yytext);}
+.             {printf("Error: unrecognized \"%s\"\n", yytext);}
 
 %%
 
