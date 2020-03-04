@@ -10,13 +10,34 @@
   void yyerror(char const *msg){
     printf("error: %s\n", msg);
   }
+
+  int yycolumn = 1;
+  #define YY_USER_ACTION \
+    yylloc.first_line = yylloc.last_line = yylineno; \
+    yylloc.first_column = yycolumn; \
+    yylloc.last_column = yycolumn + yyleng - 1; \
+    yycolumn += yyleng;
 %}
+
+%locations
 
 %token INT
 %token FLOAT
-%token ID SEMI COMMA ASSIGNOP RELOP PLUS MINUS STAR DIV AND OR DOT NOT TYPE LP RP LB RB LC RC STRUCT RETURN IF ELSE WHILE
+%token ID SEMI COMMA TYPE LC RC STRUCT RETURN IF ELSE WHILE
 
-%type Program ExtDefList ExtDef ExtDecList Specifier StructSpecifier OptTag Tag VarDec FunDec VarList ParamDec CompSt StmtList Stmt DefList Def DecList Dec Exp Args
+//%type Program ExtDefList ExtDef ExtDecList Specifier StructSpecifier OptTag Tag VarDec FunDec VarList ParamDec CompSt StmtList Stmt DefList Def DecList Dec Exp Args
+
+%right  ASSIGNOP
+%left   OR
+%left   AND
+%left   RELOP
+%left   PLUS MINUS
+%left   STAR DIV
+%right  NOT //TODO
+%left   LP RP LB RB DOT
+
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
 
 
 %%
@@ -183,7 +204,7 @@ Stmt: Exp SEMI{
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
-  | IF LP Exp RP Stmt{
+  | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE{
   treeInit(&$$, Stmt);
   $$->int_val = 3;
   $$->ch[0] = $1;
