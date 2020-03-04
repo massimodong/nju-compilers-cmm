@@ -13,6 +13,8 @@ void treeInit(Tree **tp, int st){
   t->stype = st;
   t->show = 0;
 
+  t->lineno = 0;
+
   /*
   if(st < 250){
     printf("init node of type %s\n", syntaxName[st]);

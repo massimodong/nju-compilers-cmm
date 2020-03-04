@@ -1,5 +1,6 @@
 %{
   #include "syntax.tab.h"
+  void tokenInit(Treep *, int);
   int installID();
 %}
 
@@ -10,7 +11,7 @@ pdigit  [1-9]
 odigit  [0-7]
 hdigit  [0-9A-Fa-f]
 
-comment "//".*\n
+comment "//".*
 
 WS      {delim}+|{comment}
 CMS     "/*"
@@ -63,38 +64,43 @@ WHILE   while
     c = input();
   }
 }
-{INT_DEC}     {treeInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 10); return INT;}
-{INT_OCT}     {treeInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 8); return INT;}
-{INT_HEX}     {treeInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 16); return INT;}
-{FLOAT}       {treeInit(&yylval, INT); yylval->float_val = strtof(yytext, NULL); return FLOAT;}
-{SEMI}        {treeInit(&yylval, INT); return SEMI;}
-{ASSIGNOP}    {treeInit(&yylval, INT); return ASSIGNOP;}
-{RELOP}       {treeInit(&yylval, INT); return RELOP;}
-{PLUS}        {treeInit(&yylval, INT); return PLUS;}
-{MINUS}       {treeInit(&yylval, INT); return MINUS;}
-{STAR}        {treeInit(&yylval, INT); return STAR;}
-{DIV}         {treeInit(&yylval, INT); return DIV;}
-{AND}         {treeInit(&yylval, INT); return AND;}
-{OR}          {treeInit(&yylval, INT); return OR;}
-{DOT}         {treeInit(&yylval, INT); return DOT;}
-{NOT}         {treeInit(&yylval, INT); return NOT;}
-{TYPE}        {treeInit(&yylval, INT); return TYPE;}
-{LP}          {treeInit(&yylval, INT); return LP;}
-{RP}          {treeInit(&yylval, INT); return RP;}
-{LB}          {treeInit(&yylval, INT); return LB;}
-{RB}          {treeInit(&yylval, INT); return RB;}
-{LC}          {treeInit(&yylval, INT); return LC;}
-{RC}          {treeInit(&yylval, INT); return RC;}
-{STRUCT}      {treeInit(&yylval, INT); return STRUCT;}
-{RETURN}      {treeInit(&yylval, INT); return RETURN;}
-{IF}          {treeInit(&yylval, INT); return IF;}
-{ELSE}        {treeInit(&yylval, INT); return ELSE;}
-{WHILE}       {treeInit(&yylval, INT); return WHILE;}
-{ID}          {treeInit(&yylval, INT); yylval->int_val = installID(); return ID;}
+{INT_DEC}     {tokenInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 10); return INT;}
+{INT_OCT}     {tokenInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 8); return INT;}
+{INT_HEX}     {tokenInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 16); return INT;}
+{FLOAT}       {tokenInit(&yylval, INT); yylval->float_val = strtof(yytext, NULL); return FLOAT;}
+{SEMI}        {tokenInit(&yylval, INT); return SEMI;}
+{ASSIGNOP}    {tokenInit(&yylval, INT); return ASSIGNOP;}
+{RELOP}       {tokenInit(&yylval, INT); return RELOP;}
+{PLUS}        {tokenInit(&yylval, INT); return PLUS;}
+{MINUS}       {tokenInit(&yylval, INT); return MINUS;}
+{STAR}        {tokenInit(&yylval, INT); return STAR;}
+{DIV}         {tokenInit(&yylval, INT); return DIV;}
+{AND}         {tokenInit(&yylval, INT); return AND;}
+{OR}          {tokenInit(&yylval, INT); return OR;}
+{DOT}         {tokenInit(&yylval, INT); return DOT;}
+{NOT}         {tokenInit(&yylval, INT); return NOT;}
+{TYPE}        {tokenInit(&yylval, INT); return TYPE;}
+{LP}          {tokenInit(&yylval, INT); return LP;}
+{RP}          {tokenInit(&yylval, INT); return RP;}
+{LB}          {tokenInit(&yylval, INT); return LB;}
+{RB}          {tokenInit(&yylval, INT); return RB;}
+{LC}          {tokenInit(&yylval, INT); return LC;}
+{RC}          {tokenInit(&yylval, INT); return RC;}
+{STRUCT}      {tokenInit(&yylval, INT); return STRUCT;}
+{RETURN}      {tokenInit(&yylval, INT); return RETURN;}
+{IF}          {tokenInit(&yylval, INT); return IF;}
+{ELSE}        {tokenInit(&yylval, INT); return ELSE;}
+{WHILE}       {tokenInit(&yylval, INT); return WHILE;}
+{ID}          {tokenInit(&yylval, INT); yylval->int_val = installID(); return ID;}
 
 .             {printf("Error: unrecognized %s\n", yytext);}
 
 %%
+
+void tokenInit(Treep *tp, int s){
+  treeInit(tp, s);
+  (*tp)->lineno = yylineno;
+}
 
 #define MAXN 100
 
