@@ -8,6 +8,7 @@
   void treeInit(Tree **, int);
   void treePrint(Tree *);
   void yyerror(char const *);
+  void errmsg(const char *, Treep);
 %}
 
 %token INT
@@ -50,12 +51,24 @@ ExtDef: Specifier ExtDecList SEMI {
   $$->ch[0] = $1;
   $$->ch[2] = $2;
 }
+  | Specifier error SEMI{
+  treeInit(&$$, ExtDef);
+  errmsg("invalid declarerations", $$);
+  $$->ch[0] = $1;
+  $$->ch[1] = $3;
+}
   | Specifier FunDec CompSt {
   treeInit(&$$, ExtDef);
   $$->int_val = ExtDef_Func;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
+}
+  | Specifier error CompSt{
+  treeInit(&$$, ExtDef);
+  errmsg("invalid function name", $$);
+  $$->ch[0] = $1;
+  $$->ch[1] = $3;
 }
 ;
 ExtDecList: VarDec{
@@ -88,6 +101,14 @@ StructSpecifier: STRUCT OptTag LC DefList RC{
   $$->ch[2] = $3;
   $$->ch[3] = $4;
   $$->ch[4] = $5;
+}
+  | STRUCT OptTag LC error RC{
+  treeInit(&$$, StructSpecifier);
+  errmsg("invalid struct body", $$);
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $3;
+  $$->ch[3] = $5;
 }
   | STRUCT Tag{
   treeInit(&$$, StructSpecifier);
@@ -137,7 +158,13 @@ FunDec: ID LP VarList RP{
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[3] = $3;
-
+}
+  | ID LP error RP{
+  treeInit(&$$, FuncDec);
+  errmsg("param list invalid", $$);
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $4;
 }
 ;
 VarList: ParamDec{
@@ -181,6 +208,11 @@ Stmt: Exp SEMI{
   $$->ch[0] = $1;
   $$->ch[1] = $2;
 }
+  | error SEMI{
+  treeInit(&$$, Stmt);
+  errmsg("invalid statement", $$);
+  $$->ch[0] = $1;
+}
   | CompSt{
   treeInit(&$$, Stmt);
   $$->int_val = 1;
@@ -193,6 +225,12 @@ Stmt: Exp SEMI{
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
+  | RETURN error SEMI{
+  treeInit(&$$, Stmt);
+  errmsg("return expression invalid", $$);
+  $$->ch[0] = $1;
+  $$->ch[1] = $3;
+}
   | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE{
   treeInit(&$$, Stmt);
   $$->int_val = 3;
@@ -201,6 +239,14 @@ Stmt: Exp SEMI{
   $$->ch[2] = $3;
   $$->ch[3] = $4;
   $$->ch[4] = $5;
+}
+  | IF LP error RP Stmt %prec LOWER_THAN_ELSE{
+  treeInit(&$$, Stmt);
+  errmsg("if condition invalid", $$);
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $4;
+  $$->ch[3] = $5;
 }
   | IF LP Exp RP Stmt ELSE Stmt{
   treeInit(&$$, Stmt);
@@ -213,6 +259,16 @@ Stmt: Exp SEMI{
   $$->ch[5] = $6;
   $$->ch[6] = $7;
 }
+  | IF LP error RP Stmt ELSE Stmt{
+  treeInit(&$$, Stmt);
+  errmsg("if condition invalid", $$);
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $4;
+  $$->ch[3] = $5;
+  $$->ch[4] = $6;
+  $$->ch[5] = $7;
+}
   | WHILE LP Exp RP Stmt{
   treeInit(&$$, Stmt);
   $$->int_val = 4;
@@ -221,6 +277,14 @@ Stmt: Exp SEMI{
   $$->ch[2] = $3;
   $$->ch[3] = $4;
   $$->ch[4] = $5;
+}
+  | WHILE LP error RP Stmt{
+  treeInit(&$$, Stmt);
+  errmsg("while condition invalid", $$);
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $4;
+  $$->ch[3] = $5;
 }
 ;
 
@@ -238,6 +302,12 @@ Def: Specifier DecList SEMI{
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
+}
+  | Specifier error SEMI{
+  treeInit(&$$, Def);
+  errmsg("invalid definition", $$);
+  $$->ch[0] = $1;
+  $$->ch[1] = $3;
 }
 ;
 DecList: Dec{
@@ -355,6 +425,13 @@ Exp: Exp ASSIGNOP Exp{
   $$->ch[1] = $2;
   $$->ch[3] = $3;
 }
+  | ID LP error RP{
+  treeInit(&$$, Exp);
+  errmsg("invalid arguments for function call", $$);
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $4;
+}
   | Exp LB Exp RB{
   treeInit(&$$, Exp);
   $$->int_val = 4;
@@ -362,6 +439,13 @@ Exp: Exp ASSIGNOP Exp{
   $$->ch[1] = $2;
   $$->ch[2] = $3;
   $$->ch[3] = $4;
+}
+  | Exp LB error RB{
+  treeInit(&$$, Exp);
+  errmsg("invalid array index", $$);
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[2] = $4;
 }
   | Exp DOT ID{
   treeInit(&$$, Exp);
@@ -401,6 +485,8 @@ Args: Exp{
 %%
 #include "lex.yy.c"
 void yyerror(char const *msg){
-  printf("error: %s at line %d\n", msg, yylineno);
 }
 
+void errmsg(const char *msg, Treep t){
+  t->errmsg = msg;
+}

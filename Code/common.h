@@ -4,6 +4,7 @@ typedef struct __Tree{
   int stype, show;
   struct __Tree *ch[MAXCH];
   int lineno;
+  const char *errmsg;
   union{
     int int_val;
     float float_val;

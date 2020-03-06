@@ -96,7 +96,7 @@ WHILE   while
 {WHILE}       {tokenInit(&yylval, WHILE); return WHILE;}
 {ID}          {tokenInit(&yylval, ID); yylval->int_val = installID(); return ID;}
 
-.             {printf("Error: unrecognized \"%s\"\n", yytext);}
+.             {printf("Error type A at Line %d: unrecognized symbol \"%s\"\n", yylineno, yytext);}
 
 %%
 

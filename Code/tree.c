@@ -17,6 +17,7 @@ void treeInit(Tree **tp, int st){
   t->show = 0;
 
   t->lineno = 0;
+  t->errmsg = NULL;
 
   /*
   if(st < 250){
@@ -95,7 +96,14 @@ void treeDfs(Tree *t, int s, int x){
   for(int i=0;i<MAXCH;++i) if(t->ch[i]) treeDfs(t->ch[i], t->ch[i]->stype, x+1);
 }
 
+void treeErrDfs(Tree *t){
+  if(t->errmsg) printf("Error type B at Line %d: %s\n", t->lineno, t->errmsg);
+  for(int i=0;i<MAXCH;++i) if(t->ch[i]) treeErrDfs(t->ch[i]);
+}
+
 void treePrint(Tree *t){
   treePreDfs(t);
   treeDfs(t, Program, 0);
+
+  treeErrDfs(t);
 }
