@@ -1,6 +1,7 @@
 %{
   #include "syntax.tab.h"
   void tokenInit(Treep *, int);
+  void addErrMsg(Tree *);
   int installID();
 %}
 
@@ -96,7 +97,7 @@ WHILE   while
 {WHILE}       {tokenInit(&yylval, WHILE); return WHILE;}
 {ID}          {tokenInit(&yylval, ID); yylval->int_val = installID(); return ID;}
 
-.             {printf("Error type A at Line %d: unrecognized symbol \"%s\"\n", yylineno, yytext);}
+.             {tokenInit(&yylval, INT); yylval->errmsg = "unrecognized symbol"; yylval->errlineno = yylineno, yylval->errtype = 0; addErrMsg(yylval);}
 
 %%
 

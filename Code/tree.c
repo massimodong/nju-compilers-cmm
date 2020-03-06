@@ -98,7 +98,7 @@ void sortErrMsgs(){
 void printErrMsgs(){
   for(int i=0;i<msgs_cnt;++i){
     Tree *t = msgs[i];
-    printf("Error type B at Line %d: %s\n", t->errlineno, t->errmsg);
+    printf("Error type %c at Line %d: %s\n", t->errtype ? 'B':'A', t->errlineno, t->errmsg);
   }
 }
 

@@ -495,4 +495,5 @@ void yyerror(char const *msg){
 void errmsg(const char *msg, Treep t, YYLTYPE l){
   t->errmsg = msg;
   t->errlineno = l.first_line;
+  t->errtype = 1;
 }
