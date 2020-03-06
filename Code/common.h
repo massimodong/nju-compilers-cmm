@@ -3,7 +3,7 @@
 typedef struct __Tree{
   int stype, show;
   struct __Tree *ch[MAXCH];
-  int lineno;
+  int lineno, errlineno;
   const char *errmsg;
   union{
     int int_val;

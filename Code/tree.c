@@ -97,7 +97,7 @@ void treeDfs(Tree *t, int s, int x){
 }
 
 void treeErrDfs(Tree *t){
-  if(t->errmsg) printf("Error type B at Line %d: %s\n", t->lineno, t->errmsg);
+  if(t->errmsg) printf("Error type B at Line %d: %s\n", t->errlineno, t->errmsg);
   for(int i=0;i<MAXCH;++i) if(t->ch[i]) treeErrDfs(t->ch[i]);
 }
 
