@@ -28,7 +28,7 @@ enum{
   ACTION(OptTag)\
   ACTION(Tag)\
   ACTION(VarDec)\
-  ACTION(FuncDec)\
+  ACTION(FunDec)\
   ACTION(VarList)\
   ACTION(ParamDec)\
   ACTION(CompSt)\

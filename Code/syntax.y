@@ -16,6 +16,7 @@
 %}
 
 %locations
+%define parse.lac full
 
 %token INT
 %token FLOAT
@@ -153,20 +154,20 @@ VarDec: ID{
 }
 ;
 FunDec: ID LP VarList RP{
-  treeInit(&$$, FuncDec);
+  treeInit(&$$, FunDec);
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
   $$->ch[3] = $4;
 }
   | ID LP RP{
-  treeInit(&$$, FuncDec);
+  treeInit(&$$, FunDec);
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[3] = $3;
 }
   | ID LP error RP{
-  treeInit(&$$, FuncDec);
+  treeInit(&$$, FunDec);
   errmsg("param list invalid", $$, @3);
   $$->ch[0] = $1;
   $$->ch[1] = $2;
@@ -490,6 +491,16 @@ Args: Exp{
 
 %%
 void yyerror(char const *msg){
+  if(yychar == YYEOF){
+    Tree *t;
+    treeInit(&t, INT);
+    t->errmsg = "end of file";
+    t->errlineno = yylineno;
+    t->errtype = 1;
+    addErrMsg(t);
+    sortErrMsgs();
+    printErrMsgs();
+  }
 }
 
 void errmsg(const char *msg, Treep t, YYLTYPE l){
