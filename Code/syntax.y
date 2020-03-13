@@ -8,15 +8,14 @@
   int yylex (void);
   void treeInit(Tree **, int);
 
+  int parse_ok = 1;
   #include "lex.yy.c"
 
   void treePrint(Tree *);
   void yyerror(char const *);
-  void errmsg(const char *msg, Treep t, YYLTYPE l);
 %}
 
 %locations
-%define parse.lac full
 
 %token INT
 %token FLOAT
@@ -39,7 +38,7 @@
 
 %%
 
-Program: ExtDefList {treeInit(&$$, Program); $$->ch[0] = $1; treePrint($$);}
+Program: ExtDefList {treeInit(&$$, Program); $$->ch[0] = $1; if(parse_ok) treePrint($$);printf("????????\n");}
 ;
 
 ExtDefList: ExtDef ExtDefList {treeInit(&$$, ExtDefList); $$->ch[0] = $1; $$->ch[1] = $2;}
@@ -58,12 +57,6 @@ ExtDef: Specifier ExtDecList SEMI {
   $$->ch[0] = $1;
   $$->ch[2] = $2;
 }
-  | Specifier error SEMI{
-  treeInit(&$$, ExtDef);
-  errmsg("invalid declarerations", $$, @2);
-  $$->ch[0] = $1;
-  $$->ch[1] = $3;
-}
   | Specifier FunDec CompSt {
   treeInit(&$$, ExtDef);
   $$->int_val = ExtDef_Func;
@@ -71,13 +64,7 @@ ExtDef: Specifier ExtDecList SEMI {
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
-  | Specifier error CompSt{
-  treeInit(&$$, ExtDef);
-  errmsg("invalid function name", $$, @2);
-  $$->ch[0] = $1;
-  $$->ch[1] = $3;
-}
-;
+
 ExtDecList: VarDec{
   treeInit(&$$, ExtDecList);
   $$->ch[0] = $1;
@@ -108,14 +95,6 @@ StructSpecifier: STRUCT OptTag LC DefList RC{
   $$->ch[2] = $3;
   $$->ch[3] = $4;
   $$->ch[4] = $5;
-}
-  | STRUCT OptTag LC error RC{
-  treeInit(&$$, StructSpecifier);
-  errmsg("invalid struct body", $$, @4);
-  $$->ch[0] = $1;
-  $$->ch[1] = $2;
-  $$->ch[2] = $3;
-  $$->ch[3] = $5;
 }
   | STRUCT Tag{
   treeInit(&$$, StructSpecifier);
@@ -166,13 +145,6 @@ FunDec: ID LP VarList RP{
   $$->ch[1] = $2;
   $$->ch[3] = $3;
 }
-  | ID LP error RP{
-  treeInit(&$$, FunDec);
-  errmsg("param list invalid", $$, @3);
-  $$->ch[0] = $1;
-  $$->ch[1] = $2;
-  $$->ch[2] = $4;
-}
 ;
 VarList: ParamDec{
   treeInit(&$$, VarList);
@@ -215,11 +187,6 @@ Stmt: Exp SEMI{
   $$->ch[0] = $1;
   $$->ch[1] = $2;
 }
-  | error SEMI{
-  treeInit(&$$, Stmt);
-  errmsg("invalid statement", $$, @1);
-  $$->ch[0] = $2;
-}
   | CompSt{
   treeInit(&$$, Stmt);
   $$->int_val = 1;
@@ -232,12 +199,6 @@ Stmt: Exp SEMI{
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
-  | RETURN error SEMI{
-  treeInit(&$$, Stmt);
-  errmsg("return expression invalid", $$, @2);
-  $$->ch[0] = $1;
-  $$->ch[1] = $3;
-}
   | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE{
   treeInit(&$$, Stmt);
   $$->int_val = 3;
@@ -246,14 +207,6 @@ Stmt: Exp SEMI{
   $$->ch[2] = $3;
   $$->ch[3] = $4;
   $$->ch[4] = $5;
-}
-  | IF LP error RP Stmt %prec LOWER_THAN_ELSE{
-  treeInit(&$$, Stmt);
-  errmsg("if condition invalid", $$, @3);
-  $$->ch[0] = $1;
-  $$->ch[1] = $2;
-  $$->ch[2] = $4;
-  $$->ch[3] = $5;
 }
   | IF LP Exp RP Stmt ELSE Stmt{
   treeInit(&$$, Stmt);
@@ -266,16 +219,6 @@ Stmt: Exp SEMI{
   $$->ch[5] = $6;
   $$->ch[6] = $7;
 }
-  | IF LP error RP Stmt ELSE Stmt{
-  treeInit(&$$, Stmt);
-  errmsg("if condition invalid", $$, @3);
-  $$->ch[0] = $1;
-  $$->ch[1] = $2;
-  $$->ch[2] = $4;
-  $$->ch[3] = $5;
-  $$->ch[4] = $6;
-  $$->ch[5] = $7;
-}
   | WHILE LP Exp RP Stmt{
   treeInit(&$$, Stmt);
   $$->int_val = 4;
@@ -284,14 +227,6 @@ Stmt: Exp SEMI{
   $$->ch[2] = $3;
   $$->ch[3] = $4;
   $$->ch[4] = $5;
-}
-  | WHILE LP error RP Stmt{
-  treeInit(&$$, Stmt);
-  errmsg("while condition invalid", $$, @3);
-  $$->ch[0] = $1;
-  $$->ch[1] = $2;
-  $$->ch[2] = $4;
-  $$->ch[3] = $5;
 }
 ;
 
@@ -309,12 +244,6 @@ Def: Specifier DecList SEMI{
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
-}
-  | Specifier error SEMI{
-  treeInit(&$$, Def);
-  errmsg("invalid definition", $$, @2);
-  $$->ch[0] = $1;
-  $$->ch[1] = $3;
 }
 ;
 DecList: Dec{
@@ -432,13 +361,6 @@ Exp: Exp ASSIGNOP Exp{
   $$->ch[1] = $2;
   $$->ch[3] = $3;
 }
-  | ID LP error RP{
-  treeInit(&$$, Exp);
-  errmsg("invalid arguments for function call", $$, @3);
-  $$->ch[0] = $1;
-  $$->ch[1] = $2;
-  $$->ch[2] = $4;
-}
   | Exp LB Exp RB{
   treeInit(&$$, Exp);
   $$->int_val = 4;
@@ -446,13 +368,6 @@ Exp: Exp ASSIGNOP Exp{
   $$->ch[1] = $2;
   $$->ch[2] = $3;
   $$->ch[3] = $4;
-}
-  | Exp LB error RB{
-  treeInit(&$$, Exp);
-  errmsg("invalid array index", $$, @3);
-  $$->ch[0] = $1;
-  $$->ch[1] = $2;
-  $$->ch[2] = $4;
 }
   | Exp DOT ID{
   treeInit(&$$, Exp);
@@ -491,20 +406,6 @@ Args: Exp{
 
 %%
 void yyerror(char const *msg){
-  if(yychar == YYEOF){
-    Tree *t;
-    treeInit(&t, INT);
-    t->errmsg = "end of file";
-    t->errlineno = yylineno;
-    t->errtype = 1;
-    addErrMsg(t);
-    sortErrMsgs();
-    printErrMsgs();
-  }
-}
-
-void errmsg(const char *msg, Treep t, YYLTYPE l){
-  t->errmsg = msg;
-  t->errlineno = l.first_line;
-  t->errtype = 1;
+  parse_ok = 0;
+  printf("Error type B at Line %d: %s.\n", yylineno, msg);
 }

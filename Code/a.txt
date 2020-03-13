@@ -1,0 +1,31 @@
+Error type A at Line 1: unrecognized input `#`.
+Error type B at Line 1: syntax error.
+Error type A at Line 2: unrecognized input `#`.
+Error type A at Line 3: unrecognized input `#`.
+Error type B at Line 9: syntax error.
+Error type B at Line 14: syntax error.
+Error type B at Line 19: syntax error.
+Error type B at Line 23: syntax error.
+Error type B at Line 23: syntax error.
+Error type B at Line 29: syntax error.
+Error type A at Line 39: unrecognized input `"`.
+Error type A at Line 39: unrecognized input `%`.
+Error type A at Line 39: unrecognized input `"`.
+Error type A at Line 39: unrecognized input `&`.
+Error type B at Line 39: syntax error.
+Error type A at Line 41: unrecognized input `"`.
+Error type A at Line 41: unrecognized input `%`.
+Error type A at Line 41: unrecognized input `"`.
+Error type A at Line 41: unrecognized input `&`.
+Error type B at Line 42: syntax error.
+Error type A at Line 43: unrecognized input `"`.
+Error type A at Line 43: unrecognized input `%`.
+Error type A at Line 43: unrecognized input `%`.
+Error type A at Line 43: unrecognized input `"`.
+Error type A at Line 43: unrecognized input `&`.
+Error type A at Line 43: unrecognized input `&`.
+Error type A at Line 105: unrecognized input `"`.
+Error type A at Line 105: unrecognized input `%`.
+Error type A at Line 105: unrecognized input `\`.
+Error type A at Line 105: unrecognized input `"`.
+????????

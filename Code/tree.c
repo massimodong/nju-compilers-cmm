@@ -16,15 +16,14 @@ void treeInit(Tree **tp, int st){
   t->stype = st;
   t->show = 0;
 
-  t->lineno = 0;
-  t->errmsg = NULL;
-
   /*
   if(st < 250){
     printf("init node of type %s\n", syntaxName[st]);
   }else{
     printf("init token\n");
   }
+
+  printNode(0, st, t);
   */
 }
 
@@ -70,42 +69,7 @@ void printNode(int x, int s, Tree *t){
   }
 }
 
-Tree **msgs = NULL;
-int msgs_size = 0, msgs_cnt = 0;
-void addErrMsg(Tree *t){
-  assert(msgs_size >= msgs_cnt);
-  if(msgs_size == msgs_cnt){
-    Tree **nmsgs = realloc(msgs, sizeof(Tree *) * (msgs_size * 2 + 1));
-    for(int i=0;i<msgs_size;++i) nmsgs[i] = msgs[i];
-    msgs = nmsgs;
-
-    msgs_size = msgs_size * 2 + 1;
-  }
-
-  assert(msgs_size > msgs_cnt);
-  msgs[msgs_cnt++] = t;
-}
-int cmpErrMsg(const void *app, const void *bpp){
-  const Treep *ap = app, *bp = bpp;
-  Treep a = *ap, b = *bp;
-  if(a->errlineno < b->errlineno) return -1;
-  else if(a->errlineno == b->errlineno) return 0;
-  else return 1;
-}
-void sortErrMsgs(){
-  qsort(msgs, msgs_cnt, sizeof(Tree *), cmpErrMsg);
-}
-void printErrMsgs(){
-  for(int i=0;i<msgs_cnt;++i){
-    Tree *t = msgs[i];
-    printf("Error type %c at Line %d: %s.\n", t->errtype ? 'B':'A', t->errlineno, t->errmsg);
-  }
-}
-
 void treePreDfs(Tree *t){
-  if(t->errmsg){
-    addErrMsg(t);
-  }
   if(t->stype >= INT){
     t->show = 1;
     return;
@@ -136,11 +100,5 @@ void treeDfs(Tree *t, int s, int x){
 
 void treePrint(Tree *t){
   treePreDfs(t);
-
-  if(msgs){
-    sortErrMsgs();
-    printErrMsgs();
-  }else{
-    treeDfs(t, Program, 0);
-  }
+  treeDfs(t, Program, 0);
 }

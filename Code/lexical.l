@@ -97,7 +97,7 @@ WHILE   while
 {WHILE}       {tokenInit(&yylval, WHILE); return WHILE;}
 {ID}          {tokenInit(&yylval, ID); yylval->int_val = installID(); return ID;}
 
-.             {tokenInit(&yylval, INT); yylval->errmsg = "unrecognized symbol"; yylval->errlineno = yylineno, yylval->errtype = 0; addErrMsg(yylval);}
+.             {printf("Error type A at Line %d: unrecognized input `%s`.\n", yylineno, yytext); parse_ok = 0;}
 
 %%
 
@@ -113,6 +113,7 @@ char *IDs[MAXN];
 int cid = 0;
 
 int installID(){
+  //printf("install ID :%s\n", yytext);
   for(int i=0;i<cid;++i) if(strcmp(IDs[i], yytext) == 0) return i;
   IDs[cid] = malloc(sizeof(char) * (yyleng + 1));
   strcpy(IDs[cid], yytext);
