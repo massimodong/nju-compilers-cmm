@@ -38,7 +38,7 @@
 
 %%
 
-Program: ExtDefList {treeInit(&$$, Program); $$->ch[0] = $1; if(parse_ok) treePrint($$);printf("????????\n");}
+Program: ExtDefList {treeInit(&$$, Program); $$->ch[0] = $1; if(parse_ok) treePrint($$);}
 ;
 
 ExtDefList: ExtDef ExtDefList {treeInit(&$$, ExtDefList); $$->ch[0] = $1; $$->ch[1] = $2;}
@@ -64,6 +64,10 @@ ExtDef: Specifier ExtDecList SEMI {
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
+  | error SEMI{treeInit(&$$, ExtDef); yyerrok;}
+  | error RC{treeInit(&$$, ExtDef); yyerrok;}
+  | error RB{treeInit(&$$, ExtDef); yyerrok;}
+  | error RP{treeInit(&$$, ExtDef); yyerrok;}
 
 ExtDecList: VarDec{
   treeInit(&$$, ExtDecList);
@@ -96,6 +100,7 @@ StructSpecifier: STRUCT OptTag LC DefList RC{
   $$->ch[3] = $4;
   $$->ch[4] = $5;
 }
+  | STRUCT error RC{treeInit(&$$, StructSpecifier); yyerrok;}
   | STRUCT Tag{
   treeInit(&$$, StructSpecifier);
   $$->ch[0] = $1;
@@ -131,6 +136,7 @@ VarDec: ID{
   $$->ch[2] = $3;
   $$->ch[3] = $4;
 }
+  | VarDec LB error RB{treeInit(&$$, VarDec); yyerrok;}
 ;
 FunDec: ID LP VarList RP{
   treeInit(&$$, FunDec);
@@ -145,6 +151,7 @@ FunDec: ID LP VarList RP{
   $$->ch[1] = $2;
   $$->ch[3] = $3;
 }
+  | error RP{treeInit(&$$, FunDec); yyerrok;}
 ;
 VarList: ParamDec{
   treeInit(&$$, VarList);
@@ -171,6 +178,7 @@ CompSt: LC DefList StmtList RC{
   $$->ch[2] = $3;
   $$->ch[3] = $4;
 }
+  | error RC{treeInit(&$$, CompSt); yyerrok;}
 ;
 StmtList: Stmt StmtList{
   treeInit(&$$, StmtList);
@@ -199,6 +207,7 @@ Stmt: Exp SEMI{
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
+  | error SEMI{treeInit(&$$, Stmt); yyerrok;}
   | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE{
   treeInit(&$$, Stmt);
   $$->int_val = 3;
@@ -219,6 +228,7 @@ Stmt: Exp SEMI{
   $$->ch[5] = $6;
   $$->ch[6] = $7;
 }
+  | IF error RP{treeInit(&$$, Stmt); yyerrok;}
   | WHILE LP Exp RP Stmt{
   treeInit(&$$, Stmt);
   $$->int_val = 4;
@@ -228,6 +238,7 @@ Stmt: Exp SEMI{
   $$->ch[3] = $4;
   $$->ch[4] = $5;
 }
+  | WHILE error RP{treeInit(&$$, Stmt); yyerrok;}
 ;
 
 DefList: Def DefList{
@@ -245,6 +256,7 @@ Def: Specifier DecList SEMI{
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
+  | Specifier error SEMI{treeInit(&$$, Def); yyerrok;}
 ;
 DecList: Dec{
   treeInit(&$$, DecList);
@@ -334,6 +346,7 @@ Exp: Exp ASSIGNOP Exp{
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
+  | LP error RP{treeInit(&$$, Exp); yyerrok;}
   | MINUS Exp{
   treeInit(&$$, Exp);
   $$->int_val = 2;
@@ -361,6 +374,7 @@ Exp: Exp ASSIGNOP Exp{
   $$->ch[1] = $2;
   $$->ch[3] = $3;
 }
+  | ID LP error RP{treeInit(&$$, Exp); yyerrok;}
   | Exp LB Exp RB{
   treeInit(&$$, Exp);
   $$->int_val = 4;
@@ -369,6 +383,7 @@ Exp: Exp ASSIGNOP Exp{
   $$->ch[2] = $3;
   $$->ch[3] = $4;
 }
+  | Exp LB error RB{treeInit(&$$, Exp); yyerrok;}
   | Exp DOT ID{
   treeInit(&$$, Exp);
   $$->int_val = 5;

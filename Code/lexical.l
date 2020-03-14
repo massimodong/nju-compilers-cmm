@@ -113,7 +113,7 @@ char *IDs[MAXN];
 int cid = 0;
 
 int installID(){
-  //printf("install ID :%s\n", yytext);
+  //printf("install ID: %s\n", yytext);
   for(int i=0;i<cid;++i) if(strcmp(IDs[i], yytext) == 0) return i;
   IDs[cid] = malloc(sizeof(char) * (yyleng + 1));
   strcpy(IDs[cid], yytext);
