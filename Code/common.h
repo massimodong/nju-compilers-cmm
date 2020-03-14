@@ -5,7 +5,7 @@ typedef struct __Tree{
   struct __Tree *ch[MAXCH];
   int lineno;
   union{
-    int int_val;
+    unsigned int int_val;
     float float_val;
   };
 }Tree;

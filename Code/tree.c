@@ -4,7 +4,7 @@
 #include "common.h"
 #include "syntax.tab.h"
 
-extern char *IDs[];
+extern char **IDs;
 
 void treeInit(Tree **tp, int st){
   Tree *t = malloc(sizeof(Tree));
@@ -29,7 +29,7 @@ void treeInit(Tree **tp, int st){
 
 void printToken(int s, Treep t){
   switch(s){
-    case INT: printf("INT: %d\n", t->int_val); break;
+    case INT: printf("INT: %u\n", t->int_val); break;
     case FLOAT: printf("FLOAT: %f\n", t->float_val); break;
     case ID: printf("ID: %s\n", IDs[t->int_val]); break;
     case SEMI: printf("SEMI\n"); break;

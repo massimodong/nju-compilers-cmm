@@ -29,7 +29,7 @@
 %left   RELOP
 %left   PLUS MINUS
 %left   STAR DIV
-%right  NOT //TODO
+%right  NOT
 %left   LP RP LB RB DOT
 
 %nonassoc LOWER_THAN_ELSE
@@ -347,7 +347,7 @@ Exp: Exp ASSIGNOP Exp{
   $$->ch[2] = $3;
 }
   | LP error RP{treeInit(&$$, Exp); yyerrok;}
-  | MINUS Exp{
+  | MINUS Exp %prec NOT{
   treeInit(&$$, Exp);
   $$->int_val = 2;
   $$->ch[0] = $1;

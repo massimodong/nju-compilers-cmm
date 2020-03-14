@@ -1,5 +1,6 @@
 %{
   #include "syntax.tab.h"
+  #include <assert.h>
   void tokenInit(Treep *, int);
   void addErrMsg(Tree *);
   int installID();
@@ -19,12 +20,13 @@ comment "//".*
 WS      {delim}+|{comment}
 CMS     "/*"
 
-INT_DEC 0|{pdigit}{digit}*
+INT_DEC 0|({pdigit}{digit}*)
 INT_OCT 0{odigit}+
 INT_HEX 0(x|X){hdigit}+
 
 FLOAT1  {digit}+\.{digit}+
-FLOAT2  {digit}*\.{digit}*(E|e)(\+|-)?{digit}+
+FLOAT2B ({digit}+\.{digit}*)|({digit}*\.{digit}+)
+FLOAT2  {FLOAT2B}(E|e)(\+|-)?{digit}+
 FLOAT   {FLOAT1}|{FLOAT2}
 
 ID      ({letter}|_)({letter}|_|{digit})*
@@ -60,14 +62,15 @@ WHILE   while
   int l = '\0', c = input();
   while(!((l == '*') && (c == '/'))){
     if(c == EOF || c == 0){
-      //TODO: error
+      printf("Error type A at Line %d: unterminated comment.\n", yylineno);
+      parse_ok = 0;
       break;
     }
     l = c;
     c = input();
   }
 }
-{INT_DEC}     {tokenInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 10); return INT;}
+{INT_DEC}     {tokenInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 10); return INT; /*Here we could have used strtol(yytext, NULL, 0) for all bases.*/}
 {INT_OCT}     {tokenInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 8); return INT;}
 {INT_HEX}     {tokenInit(&yylval, INT); yylval->int_val = strtol(yytext, NULL, 16); return INT;}
 {FLOAT}       {tokenInit(&yylval, FLOAT); yylval->float_val = strtof(yytext, NULL); return FLOAT;}
@@ -106,15 +109,18 @@ void tokenInit(Treep *tp, int s){
   (*tp)->lineno = yylineno;
 }
 
-#define MAXN 100
+char **IDs = NULL;
 
-char *IDs[MAXN];
-
-int cid = 0;
+int cid = 0, sizeid = 0;
 
 int installID(){
   //printf("install ID: %s\n", yytext);
   for(int i=0;i<cid;++i) if(strcmp(IDs[i], yytext) == 0) return i;
+  if(cid == sizeid){
+    sizeid = sizeid * 2 + 1;
+    IDs = realloc(IDs, sizeid * sizeof(char *));
+  }
+  assert(cid < sizeid);
   IDs[cid] = malloc(sizeof(char) * (yyleng + 1));
   strcpy(IDs[cid], yytext);
   return cid++;
