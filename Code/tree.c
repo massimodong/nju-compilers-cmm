@@ -23,7 +23,7 @@ void treeInit(Tree **tp, int st){
     printf("init token\n");
   }
 
-  printNode(0, st, t);
+  if(st != ID) printNode(0, st, t);
   */
 }
 

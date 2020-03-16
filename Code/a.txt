@@ -1,0 +1,456 @@
+flex -o ./lex.yy.c ./lexical.l
+bison -o ./syntax.tab.c -d -v ./syntax.y
+gcc -c ./syntax.tab.c -o ./syntax.tab.o
+gcc -o parser ./tree.o ./main.o ./syntax.tab.o -lfl -ly
+./parser ../Test/test1.cmm
+TYPE: int
+Specifier (0)
+install ID: C6Cm
+SEMI
+VarDec (0)
+ExtDecList (0)
+ExtDef (0)
+STRUCT
+LC
+OptTag (0)
+TYPE: int
+Specifier (0)
+install ID: tn1MvIyQ
+VarDec (0)
+ASSIGNOP
+install ID: XRwVumiuk
+LP
+FLOAT: 0.000000
+Exp (0)
+COMMA
+LP
+install ID: wzPFb9
+LP
+FLOAT: 0.000000
+Exp (0)
+DOT
+install ID: CDIkEC9zH
+Exp (0)
+AND
+install ID: grNAXb
+RELOP
+Exp (0)
+install ID: tyB82V5k5_z
+DIV
+Exp (0)
+FLOAT: 0.000000
+Exp (0)
+RP
+Exp (0)
+Exp (0)
+Exp (0)
+Args (0)
+Exp (0)
+RP
+Exp (0)
+RP
+Args (0)
+Args (0)
+Exp (0)
+STAR
+INT: 0
+Exp (0)
+COMMA
+Exp (0)
+Dec (0)
+install ID: bPzTNL8
+VarDec (0)
+LB
+INT: 0
+RB
+VarDec (0)
+LB
+INT: 0
+RB
+VarDec (0)
+COMMA
+Dec (0)
+install ID: BuyHyX1l4
+VarDec (0)
+ASSIGNOP
+INT: 0
+Exp (0)
+ASSIGNOP
+INT: 0
+Exp (0)
+RELOP
+install ID: th1f0UE
+LB
+Exp (0)
+INT: 0
+Exp (0)
+RB
+Exp (0)
+LB
+install ID: QK817c
+DOT
+Exp (0)
+install ID: m_zfzy
+Exp (0)
+RB
+Exp (0)
+ASSIGNOP
+Exp (0)
+install ID: q6V2B
+LP
+FLOAT: 0.000000
+Exp (0)
+RP
+Args (0)
+Exp (0)
+DIV
+MINUS
+FLOAT: 0.000000
+Exp (0)
+COMMA
+Exp (0)
+Exp (0)
+Exp (0)
+Exp (0)
+Dec (0)
+install ID: D5eaxw
+VarDec (0)
+SEMI
+Dec (0)
+DecList (0)
+DecList (0)
+DecList (0)
+DecList (0)
+Def (0)
+RC
+DefList (0)
+DefList (0)
+StructSpecifier (0)
+Specifier (0)
+install ID: GObeI4rRy
+LP
+RP
+FunDec (0)
+LC
+TYPE: int
+Specifier (0)
+install ID: IA60uLLC
+VarDec (0)
+LB
+INT: 0
+RB
+VarDec (0)
+LB
+INT: 0
+RB
+VarDec (0)
+COMMA
+Dec (0)
+install ID: vznN3je
+VarDec (0)
+ASSIGNOP
+INT: 0
+Exp (0)
+COMMA
+Dec (0)
+install ID: LFfu0gc
+VarDec (0)
+LB
+INT: 0
+RB
+VarDec (0)
+SEMI
+Dec (0)
+DecList (0)
+DecList (0)
+DecList (0)
+Def (0)
+IF
+DefList (0)
+DefList (0)
+LP
+INT: 0
+Exp (0)
+RP
+RETURN
+FLOAT: 0.000000
+Exp (0)
+SEMI
+Stmt (0)
+RC
+Stmt (0)
+StmtList (0)
+StmtList (0)
+CompSt (0)
+ExtDef (0)
+STRUCT
+install ID: nUAh9ElXTq
+install ID: FAVxp
+Tag (0)
+StructSpecifier (0)
+Specifier (0)
+LP
+RP
+FunDec (0)
+LC
+MINUS
+DefList (0)
+INT: 0
+Exp (0)
+ASSIGNOP
+Exp (0)
+FLOAT: 0.000000
+Exp (0)
+DIV
+LP
+install ID: IYdF5b6RLx
+LP
+INT: 0
+Exp (0)
+COMMA
+NOT
+install ID: dbIcg2
+PLUS
+Exp (0)
+Exp (0)
+FLOAT: 0.000000
+Exp (0)
+COMMA
+Exp (0)
+install ID: laLkgo
+RP
+Exp (0)
+Args (0)
+Args (0)
+Args (0)
+Exp (0)
+RP
+Exp (0)
+SEMI
+Exp (0)
+Exp (0)
+Stmt (0)
+RC
+StmtList (0)
+StmtList (0)
+CompSt (0)
+ExtDef (0)
+TYPE: int
+Specifier (0)
+install ID: gys5Mdxx
+LB
+VarDec (0)
+INT: 0
+RB
+VarDec (0)
+LB
+INT: 0
+RB
+VarDec (0)
+COMMA
+install ID: LVzqAR
+VarDec (0)
+SEMI
+ExtDecList (0)
+ExtDecList (0)
+ExtDef (0)
+TYPE: int
+Specifier (0)
+install ID: Az1Qu2z6ZR
+LP
+TYPE: int
+Specifier (0)
+install ID: uBXmqN
+VarDec (0)
+LB
+INT: 0
+RB
+VarDec (0)
+RP
+ParamDec (0)
+VarList (0)
+FunDec (0)
+LC
+WHILE
+DefList (0)
+LP
+INT: 0
+Exp (0)
+DIV
+MINUS
+INT: 0
+Exp (0)
+STAR
+Exp (0)
+Exp (0)
+INT: 0
+Exp (0)
+DOT
+install ID: YjvqV9zR
+Exp (0)
+RP
+Exp (0)
+WHILE
+LP
+install ID: VGQNkM
+LP
+FLOAT: 0.000000
+Exp (0)
+COMMA
+FLOAT: 0.000000
+Exp (0)
+STAR
+FLOAT: 0.000000
+Exp (0)
+COMMA
+Exp (0)
+install ID: pBAT5wcaj
+RP
+Exp (0)
+Args (0)
+Args (0)
+Args (0)
+Exp (0)
+RP
+WHILE
+LP
+install ID: O3FJgaNjW
+LP
+NOT
+install ID: MKWnEXO0
+LB
+Exp (0)
+INT: 0
+Exp (0)
+RB
+Exp (0)
+STAR
+Exp (0)
+install ID: BXAOkBs6tj
+LP
+install ID: jEiZzs5e
+LP
+install ID: H9oKcy
+RP
+Exp (0)
+Args (0)
+Exp (0)
+COMMA
+INT: 0
+Exp (0)
+ASSIGNOP
+FLOAT: 0.000000
+Exp (0)
+AND
+FLOAT: 0.000000
+Exp (0)
+MINUS
+install ID: mCORLXDs
+OR
+Exp (0)
+Exp (0)
+Exp (0)
+INT: 0
+Exp (0)
+DOT
+install ID: srGYh
+Exp (0)
+NOT
+Exp (0)
+Exp (0)
+Args (0)
+Args (0)
+Error type B at Line 88: syntax error.
+install ID: emftigG
+PLUS
+install ID: WI_Z6_zK
+STAR
+install ID: DhLiajvLXD6
+DOT
+install ID: BQbA
+LB
+install ID: z3GFoT
+PLUS
+FLOAT: 0.000000
+RB
+AND
+NOT
+FLOAT: 0.000000
+RELOP
+FLOAT: 0.000000
+OR
+FLOAT: 0.000000
+DIV
+INT: 0
+LB
+FLOAT: 0.000000
+MINUS
+FLOAT: 0.000000
+RB
+OR
+INT: 0
+PLUS
+INT: 0
+LB
+LP
+install ID: s829Ti
+LP
+install ID: WUhTtOTPL
+RP
+Exp (0)
+RP
+Exp (0)
+Args (0)
+Exp (0)
+RB
+Error type B at Line 101: syntax error.
+AND
+INT: 0
+DIV
+NOT
+INT: 0
+MINUS
+FLOAT: 0.000000
+MINUS
+INT: 0
+DOT
+install ID: GujVbRs
+AND
+FLOAT: 0.000000
+STAR
+install ID: CdWEZiyA
+LP
+install ID: OtZ2
+ASSIGNOP
+install ID: Xcz2GDg
+COMMA
+install ID: YoY_EZK
+LP
+RP
+Stmt (0)
+Stmt (0)
+Stmt (0)
+RP
+Error type B at Line 106: syntax error.
+STAR
+INT: 0
+RP
+RP
+RP
+RETURN
+INT: 0
+SEMI
+Stmt (0)
+RC
+StmtList (0)
+StmtList (0)
+StmtList (0)
+CompSt (0)
+ExtDef (0)
+ExtDefList (0)
+ExtDefList (0)
+ExtDefList (0)
+ExtDefList (0)
+ExtDefList (0)
+ExtDefList (0)
+Program (0)

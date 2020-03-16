@@ -33,7 +33,7 @@ ID      ({letter}|_)({letter}|_|{digit})*
 SEMI    ;
 COMMA   ,
 ASSIGNOP  =
-RELOP   >|<|>=|<=|==|!=
+RELOP   (>)|(<)|(>=)|(<=)|(==)|(!=)
 PLUS    \+
 MINUS   -
 STAR    \*
