@@ -99,6 +99,11 @@ void treeDfs(Tree *t, int s, int x){
 }
 
 void treePrint(Tree *t){
+  extern int yylineno;
   treePreDfs(t);
+  if(!t->show){
+    t->show = 1;
+    t->lineno = yylineno;
+  }
   treeDfs(t, Program, 0);
 }
