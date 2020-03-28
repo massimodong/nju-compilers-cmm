@@ -51,3 +51,22 @@ enum{
 static const char *syntaxName[] = {
   Syntaxes(GENERATE_STRING)
 };
+
+/*########### Type ########*/
+typedef struct __Type{
+}Type;
+
+/*###########symbol table########*/
+typedef struct __SymTableEmtry{
+  const char *name;
+  int is_in_stack;
+  Type *type;
+}SymTabEntry;
+
+
+/*############ Trie #############*/
+typedef struct __Trie{
+  struct __Trie *go[26+26+10+1];
+  int depth;
+  SymTabEntry *entry;
+}Trie;
