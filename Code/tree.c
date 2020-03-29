@@ -6,6 +6,8 @@
 
 extern char **IDs;
 
+void resolveProgram(Tree *);
+
 void treeInit(Tree **tp, int st){
   Tree *t = malloc(sizeof(Tree));
   *tp = t;
@@ -94,11 +96,13 @@ void treePreDfs(Tree *t){
 void treeDfs(Tree *t, int s, int x){
   //printf("dfsing %d, %d\n", (int)t, s);
   if(!t->show) return;
+#ifdef PRINTYYTREE
   printNode(x, s, t);
+#endif
   for(int i=0;i<MAXCH;++i) if(t->ch[i]) treeDfs(t->ch[i], t->ch[i]->stype, x+1);
 }
 
-void treePrint(Tree *t){
+void treeCompile(Tree *t){
   extern int yylineno;
   treePreDfs(t);
   if(!t->show){
@@ -106,4 +110,5 @@ void treePrint(Tree *t){
     t->lineno = yylineno;
   }
   treeDfs(t, Program, 0);
+  resolveProgram(t);
 }

@@ -11,7 +11,7 @@
   int parse_ok = 1;
   #include "lex.yy.c"
 
-  void treePrint(Tree *);
+  void treeCompile(Tree *);
   void yyerror(char const *);
 %}
 
@@ -38,7 +38,7 @@
 
 %%
 
-Program: ExtDefList {treeInit(&$$, Program); $$->ch[0] = $1; if(parse_ok) treePrint($$);}
+Program: ExtDefList {treeInit(&$$, Program); $$->ch[0] = $1; if(parse_ok) treeCompile($$);}
 ;
 
 ExtDefList: ExtDef ExtDefList {treeInit(&$$, ExtDefList); $$->ch[0] = $1; $$->ch[1] = $2;}
@@ -83,12 +83,12 @@ ExtDecList: VarDec{
 
 Specifier: TYPE{
   treeInit(&$$, Specifier);
-  $$->int_val = 0;
+  $$->int_val = Specifier_Type;
   $$->ch[0] = $1;
 }
   | StructSpecifier{
   treeInit(&$$, Specifier);
-  $$->int_val = 1;
+  $$->int_val = Specifier_Struct;
   $$->ch[0] = $1;
 }
 ;
@@ -125,12 +125,12 @@ Tag: ID{
 
 VarDec: ID{
   treeInit(&$$, VarDec);
-  $$->int_val = 0;
+  $$->int_val = VarDec_Id;
   $$->ch[0] = $1;
 }
   | VarDec LB INT RB{
   treeInit(&$$, VarDec);
-  $$->int_val = 1;
+  $$->int_val = VarDec_Array;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
