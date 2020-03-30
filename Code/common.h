@@ -73,15 +73,16 @@ typedef struct __Type{
   int type; // 0 for int, 1 for float, 2 for array, 3 for struct
 
   union{
-    int size; //for array
     struct{
-      const char *name; //for struct
-      struct __Type *structType;
+      int size; //for array
+      struct __Type *next;
+    };
+    struct{
+      List *structList;
       struct __Trie *map;
     };
   };
 
-  struct __Type *next, *last;
 }Type;
 
 /*########### Param ########*/
@@ -93,6 +94,11 @@ typedef struct{
 typedef struct{
   Type *type;
 }Arg;
+
+typedef struct{
+  Type *type;
+  const char *name;
+}StructEntry;
 
 
 /*###########symbol table########*/
@@ -128,7 +134,7 @@ typedef struct __Tree{
     float float_val;
   };
 
-  Type *exp_type;
+  Type *exp_type, *struct_type;
   const char *var_name;
   List *var_list, *arg_list;
 }Tree;

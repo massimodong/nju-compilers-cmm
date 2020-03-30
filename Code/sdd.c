@@ -14,49 +14,31 @@ List *newList();
 
 Type *IntType, *FloatType;
 
-Type *newType(){
-  return malloc(sizeof(Type));
-}
 Type *makeArray(Type *t, int n){
-  Type *ret = newType();
+  Type *ret = malloc(sizeof(Type));
   ret->type = 2;
   ret->size = n;
   ret->next = t;
-  if(t->type == 2) ret->last = t->last;
-  else ret->last = t;
   return ret;
 }
-Type *makeStruct(Type *t, const char *name){
+StructEntry *makeStructEntry(Type *t, const char *name){
   assert(t);
-  Type *ret = newType();
-  ret->type = 3;
-  ret->name = name;
-  ret->structType = t;
-  ret->next = NULL;
-  ret->last = ret;
-  return ret;
-}
-Type *mergeStruct(Type *t, Type *tr){
-  if(t == NULL) return tr;
-  else if(tr == NULL) return t;
-  assert(t->type == 3);
-  assert(tr->type == 3);
-  assert(t->structType);
-  assert(tr->structType);
-  t->last->next = tr;
-  t->last = tr->last;
-  return t;
+  StructEntry *se = malloc(sizeof(StructEntry));
+  se->type = t;
+  se->name = name;
+  return se;
 }
 int structConstructMap(Type *t){
   t->map = NULL;
   int ok = 1;
-  for(Type *n = t;n;n=n->next){
+  for(ListNode *n = t->structList->head;n;n=n->next){
+    StructEntry *se = n->val;
     SymTabEntry *entry = malloc(sizeof(SymTabEntry));
-    entry->name = n->name;
+    entry->name = se->name;
     entry->depth = 0;
     entry->isStructDec = 0;
-    entry->type = n;
-    if(!trieInsert(&t->map, n->name, entry)){
+    entry->type = se->type;
+    if(!trieInsert(&t->map, se->name, entry)){
       ok = 0;
     }
   }
@@ -79,16 +61,14 @@ int typeEq(Type *t1, Type *t2){
     return typeEq(t1->next, t2->next);
   }else if(t1->type == 3){
     if(t2->type != 3) return 0;
-    if(!typeEq(t1->structType, t2->structType)){
-      return 0;
+    for(ListNode *n1 = t1->structList->head, *n2 = t2->structList->head;n1||n2;n1 = n1->next, n2 = n2->next){
+      if(n1 == NULL || n2 == NULL){
+        return 0;
+      }
+      StructEntry *se1 = n1->val, *se2 = n2->val;
+      if(!typeEq(se1->type, se2->type)) return 0;
     }
-    if(t1->next == NULL && t2->next == NULL){
-      return 1;
-    }else if(t1->next == NULL || t2->next == NULL){
-      return 0;
-    }else{
-      return typeEq(t1->next, t2->next);
-    }
+    return 1;
   }else{
     assert(0);
   }
@@ -105,10 +85,11 @@ void printType(Type *t){
   }else{
     assert(t->type == 3);
     printf("struct{");
-    for(Type *p = t; p; p = p->next){
-      printf("(%s: ", p->name);
-      assert(p->structType);
-      printType(p->structType);
+    for(ListNode *n = t->structList->head; n; n = n->next){
+      StructEntry *se = n->val;
+      printf("(%s: ", se->name);
+      assert(se->type);
+      printType(se->type);
       printf(")");
     }
     printf("}");
@@ -195,17 +176,17 @@ void resolveDef_fromCompSt(Tree *);
 void resolveDecList_fromCompSt(Tree *); //inh: type
 void resolveDec_fromCompSt(Tree *); //inh: type; registers variables
 
-void resolveDefList_fromStruct(Tree *); //syn: type
-void resolveDef_fromStruct(Tree *); //syn: type
-void resolveDecList_fromStruct(Tree *); //inh: type; syn: type (struct to be merged)
-void resolveDec_fromStruct(Tree *); //inh: type; syn: type (struct of size 1)
+void resolveDefList_fromStruct(Tree *); //inh: var_list (to be filled)
+void resolveDef_fromStruct(Tree *); //inh: var_list (to be filled)
+void resolveDecList_fromStruct(Tree *); //inh: var_list (to be filled)
+void resolveDec_fromStruct(Tree *); //inh: var_list (to be filled)
 
 void resolveExp(Tree *); //syn: exp_type
 void resolveArgs(Tree *); //syn: arg_list
 
 void resolveProgram(Tree *t){
-  IntType = newType();
-  FloatType = newType();
+  IntType = malloc(sizeof(Type));
+  FloatType = malloc(sizeof(Type));
   IntType->type = 0;
   FloatType->type = 1;
 
@@ -285,13 +266,16 @@ void resolveSpecifier(Tree *t){
 void resolveStructSpecifier(Tree *t){
     Type *type = NULL;
     if(t->ch[3]){ //if defined body
+      type = malloc(sizeof(Type));
+      type->type = 3;
+      type->structList = newList();
+      type->map = NULL;
+      type->next = NULL;
+
+      t->ch[3]->struct_type = type;
       symTabStackPush();
       resolveDefList_fromStruct(t->ch[3]);
       symTabStackPop();
-      type = t->ch[3]->exp_type;
-      if(!structConstructMap(type)){
-        sdd_error(15, "duplicate names in struct", t);
-      }
     }
     if(t->ch[1]->show){ //Tag name is not empty
       const char *name = IDs[t->ch[1]->ch[0]->int_val];
@@ -458,31 +442,30 @@ void resolveDec_fromCompSt(Tree *t){
 }
 
 void resolveDefList_fromStruct(Tree *t){
-  t->exp_type = NULL;
   if(t->ch[0]){
+    t->ch[0]->struct_type = t->struct_type;
+    t->ch[1]->struct_type = t->struct_type;
     resolveDef_fromStruct(t->ch[0]);
     resolveDefList_fromStruct(t->ch[1]);
-    t->exp_type = mergeStruct(t->ch[0]->exp_type, t->ch[1]->exp_type);
   }
 }
 
 void resolveDef_fromStruct(Tree *t){
   resolveSpecifier(t->ch[0]);
   t->ch[1]->exp_type = t->ch[0]->exp_type;
+  t->ch[1]->struct_type = t->struct_type;
   resolveDecList_fromStruct(t->ch[1]);
-  t->exp_type = t->ch[1]->exp_type;
 }
 
 void resolveDecList_fromStruct(Tree *t){
   t->ch[0]->exp_type = t->exp_type;
+  t->ch[0]->struct_type = t->struct_type;
   resolveDec_fromStruct(t->ch[0]);
 
   if(t->ch[2]){
     t->ch[2]->exp_type = t->exp_type;
+    t->ch[2]->struct_type = t->struct_type;
     resolveDecList_fromStruct(t->ch[2]);
-    t->exp_type = mergeStruct(t->ch[0]->exp_type, t->ch[2]->exp_type);
-  }else{
-    t->exp_type = t->ch[0]->exp_type;
   }
 }
 
@@ -493,7 +476,22 @@ void resolveDec_fromStruct(Tree *t){
 
   t->ch[0]->exp_type = t->exp_type;
   resolveVarDec(t->ch[0]);
-  t->exp_type = makeStruct(t->ch[0]->exp_type, t->ch[0]->var_name);
+
+  StructEntry *se = makeStructEntry(t->ch[0]->exp_type, t->ch[0]->var_name);
+  assert(se);
+  assert(t->struct_type);
+  assert(t->struct_type->structList);
+  listAppend(t->struct_type->structList, se);
+
+  SymTabEntry *entry = malloc(sizeof(SymTabEntry));
+  entry->name = se->name;
+  entry->depth = 0;
+  entry->isStructDec = 0;
+  entry->type = se->type;
+
+  if(!trieInsert(&t->struct_type->map, se->name, entry)){
+    sdd_error(15, "redefined struct member", t);
+  }
 }
 
 int isValidLeftValue(Tree *t){
@@ -648,7 +646,7 @@ void resolveExp(Tree *t){
           sdd_error(14, "member not found", t);
           t->exp_type = IntType;
         }else{
-          t->exp_type = entry->type->structType;
+          t->exp_type = entry->type;
         }
       }
       break;
