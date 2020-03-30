@@ -9,6 +9,12 @@ ListNode *newListNode(void *v){
   ret->val = v;
 }
 
+List *newList(){
+  List *list = malloc(sizeof(List));
+  list->head = list->rear = NULL;
+  return list;
+}
+
 void listAppend(List *l, void *v){
   if(l->head == NULL){
     assert(l->rear == NULL);
@@ -28,5 +34,16 @@ void listPopRear(List *l){ //TODO: maybe we can free space here
     l->head = l->rear = NULL;
   }else{
     l->rear = l->rear->prev;
+  }
+}
+
+List *listMerge(List *a, List *b){
+  if(a->head == NULL) return b;
+  else if(b->head == NULL) return a;
+  else{
+    a->rear->next = b->head;
+    b->head->prev = a->rear;
+    a->rear = b->rear;
+    return a;
   }
 }

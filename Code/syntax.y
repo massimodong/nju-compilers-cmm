@@ -56,6 +56,12 @@ ExtDef: Specifier ExtDecList SEMI {
   $$->int_val = ExtDef_Val;
   $$->ch[0] = $1;
   $$->ch[2] = $2;
+} | Specifier FunDec SEMI {
+  treeInit(&$$, ExtDef);
+  $$->int_val = ExtDef_Func;
+  $$->ch[0] = $1;
+  $$->ch[1] = $2;
+  $$->ch[3] = $3;
 }
   | Specifier FunDec CompSt {
   treeInit(&$$, ExtDef);
@@ -191,18 +197,18 @@ StmtList: Stmt StmtList{
 ;
 Stmt: Exp SEMI{
   treeInit(&$$, Stmt);
-  $$->int_val = 0;
+  $$->int_val = Stmt_Exp;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
 }
   | CompSt{
   treeInit(&$$, Stmt);
-  $$->int_val = 1;
+  $$->int_val = Stmt_CompSt;
   $$->ch[0] = $1;
 }
   | RETURN Exp SEMI{
   treeInit(&$$, Stmt);
-  $$->int_val = 2;
+  $$->int_val = Stmt_Return;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
@@ -210,7 +216,7 @@ Stmt: Exp SEMI{
   | error SEMI{treeInit(&$$, Stmt); yyerrok;}
   | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE{
   treeInit(&$$, Stmt);
-  $$->int_val = 3;
+  $$->int_val = Stmt_If;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
@@ -219,7 +225,7 @@ Stmt: Exp SEMI{
 }
   | IF LP Exp RP Stmt ELSE Stmt{
   treeInit(&$$, Stmt);
-  $$->int_val = 3;
+  $$->int_val = Stmt_If;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
@@ -231,7 +237,7 @@ Stmt: Exp SEMI{
   | IF error RP{treeInit(&$$, Stmt); yyerrok;}
   | WHILE LP Exp RP Stmt{
   treeInit(&$$, Stmt);
-  $$->int_val = 4;
+  $$->int_val = Stmt_While;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
@@ -285,63 +291,63 @@ Dec: VarDec{
 
 Exp: Exp ASSIGNOP Exp{
   treeInit(&$$, Exp);
-  $$->int_val = 0;
+  $$->int_val = Exp_Op2;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp AND Exp{
   treeInit(&$$, Exp);
-  $$->int_val = 0;
+  $$->int_val = Exp_Op2;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp OR Exp{
   treeInit(&$$, Exp);
-  $$->int_val = 0;
+  $$->int_val = Exp_Op2;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp RELOP Exp{
   treeInit(&$$, Exp);
-  $$->int_val = 0;
+  $$->int_val = Exp_Op2;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp PLUS Exp{
   treeInit(&$$, Exp);
-  $$->int_val = 0;
+  $$->int_val = Exp_Op2;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp MINUS Exp{
   treeInit(&$$, Exp);
-  $$->int_val = 0;
+  $$->int_val = Exp_Op2;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp STAR Exp{
   treeInit(&$$, Exp);
-  $$->int_val = 0;
+  $$->int_val = Exp_Op2;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp DIV Exp{
   treeInit(&$$, Exp);
-  $$->int_val = 0;
+  $$->int_val = Exp_Op2;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | LP Exp RP{
   treeInit(&$$, Exp);
-  $$->int_val = 1;
+  $$->int_val = Exp_Parentheses;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
@@ -349,19 +355,19 @@ Exp: Exp ASSIGNOP Exp{
   | LP error RP{treeInit(&$$, Exp); yyerrok;}
   | MINUS Exp %prec NOT{
   treeInit(&$$, Exp);
-  $$->int_val = 2;
+  $$->int_val = Exp_Op1;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
 }
   | NOT Exp{
   treeInit(&$$, Exp);
-  $$->int_val = 2;
+  $$->int_val = Exp_Op1;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
 }
   | ID LP Args RP{
   treeInit(&$$, Exp);
-  $$->int_val = 3;
+  $$->int_val = Exp_FunCall;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
@@ -369,7 +375,7 @@ Exp: Exp ASSIGNOP Exp{
 }
   | ID LP RP{
   treeInit(&$$, Exp);
-  $$->int_val = 3;
+  $$->int_val = Exp_FunCall;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[3] = $3;
@@ -377,7 +383,7 @@ Exp: Exp ASSIGNOP Exp{
   | ID LP error RP{treeInit(&$$, Exp); yyerrok;}
   | Exp LB Exp RB{
   treeInit(&$$, Exp);
-  $$->int_val = 4;
+  $$->int_val = Exp_QueryArray;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
@@ -386,24 +392,24 @@ Exp: Exp ASSIGNOP Exp{
   | Exp LB error RB{treeInit(&$$, Exp); yyerrok;}
   | Exp DOT ID{
   treeInit(&$$, Exp);
-  $$->int_val = 5;
+  $$->int_val = Exp_QueryStruct;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | ID{
   treeInit(&$$, Exp);
-  $$->int_val = 6;
+  $$->int_val = Exp_Id;
   $$->ch[0] = $1;
 }
   | INT{
   treeInit(&$$, Exp);
-  $$->int_val = 7;
+  $$->int_val = Exp_Constant;
   $$->ch[0] = $1;
 }
   | FLOAT{
   treeInit(&$$, Exp);
-  $$->int_val = 7;
+  $$->int_val = Exp_Constant;
   $$->ch[0] = $1;
 }
 ;

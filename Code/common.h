@@ -7,6 +7,19 @@ enum{
   Specifier_Struct,
   VarDec_Id,
   VarDec_Array,
+  Stmt_Exp,
+  Stmt_CompSt,
+  Stmt_Return,
+  Stmt_If,
+  Stmt_While,
+  Exp_Op2,
+  Exp_Parentheses,
+  Exp_Op1,
+  Exp_FunCall,
+  Exp_QueryArray,
+  Exp_QueryStruct,
+  Exp_Id,
+  Exp_Constant,
 };
 
 #define Syntaxes(ACTION)\
@@ -55,6 +68,7 @@ typedef struct{
 }List;
 
 /*########### Type ########*/
+struct __Trie;
 typedef struct __Type{
   int type; // 0 for int, 1 for float, 2 for array, 3 for struct
 
@@ -63,6 +77,7 @@ typedef struct __Type{
     struct{
       const char *name; //for struct
       struct __Type *structType;
+      struct __Trie *map;
     };
   };
 
@@ -74,6 +89,11 @@ typedef struct{
   Type *type;
   const char *name;
 }Param;
+
+typedef struct{
+  Type *type;
+}Arg;
+
 
 /*###########symbol table########*/
 typedef struct __SymTableEmtry{
@@ -110,6 +130,7 @@ typedef struct __Tree{
 
   Type *exp_type;
   const char *var_name;
+  List *var_list, *arg_list;
 }Tree;
 
 typedef Tree *Treep;
