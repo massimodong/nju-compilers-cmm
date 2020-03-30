@@ -1,9 +1,17 @@
-int main(){
-  int a = 1;
-  /*你为什么*/ 1; //没带口罩？
-  /*なぜマス*/ 2; //クをつけないの？
-  /*¿Por qué*/ 3; //no llevas máscaras?
-  /*почему ты*/4; //не носишь маски?
-  /*tại sao*/  5; //bạn không đeo mặt nạ?
-  /*نې///*مىشقا ماسكا تاقىمايسىز؟
-}
+int i[2][5][100];
+
+struct Point{
+  int x, y;
+  float pos;
+  struct{
+    int inner_st;
+  }A;
+} B[100];
+
+struct UnDef;
+
+int;
+
+struct UnDef2;
+
+int i;

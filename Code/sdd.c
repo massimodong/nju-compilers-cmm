@@ -305,7 +305,7 @@ void resolveStructSpecifier(Tree *t){
           if(e->isStructDec) type = e->type;
           else{
             type = IntType;
-            sdd_error(16, "TODO", t);
+            sdd_error(16, "not a struct", t);
           }
         }else{
           type = IntType;
@@ -488,7 +488,7 @@ void resolveDecList_fromStruct(Tree *t){
 
 void resolveDec_fromStruct(Tree *t){
   if(t->ch[2]){
-    sdd_error(15, "TODO", t);
+    sdd_error(15, "you can't initialize a struct member", t);
   }
 
   t->ch[0]->exp_type = t->exp_type;

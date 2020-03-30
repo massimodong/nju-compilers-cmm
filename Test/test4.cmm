@@ -1,0 +1,23 @@
+struct StA{
+  float stav;
+};
+
+struct Point{
+  struct Point{
+    int x, y;
+  }p;
+  struct StA a;
+
+  struct StA{
+    int stab, stac;
+  }b;
+
+  struct StA c;
+
+/*  struct StA{
+    float dddd;
+    int cccc;
+  }err;*/
+};
+
+//TODO: we check equivalence on these strange structs
