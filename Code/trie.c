@@ -58,10 +58,6 @@ int trieInsert(Trie **tp, const char *str, SymTabEntry *entry){
   }
 
   if(canUpdate(t->entry, entry)){
-    /*
-    if(t->entry == NULL) printf("entry is NULL\n");
-    else printf("entry is not NULL\n");
-    */
     t->entry = entry;
     return 1;
   }else{

@@ -79,7 +79,16 @@ int typeEq(Type *t1, Type *t2){
     return typeEq(t1->next, t2->next);
   }else if(t1->type == 3){
     if(t2->type != 3) return 0;
-    assert(0);
+    if(!typeEq(t1->structType, t2->structType)){
+      return 0;
+    }
+    if(t1->next == NULL && t2->next == NULL){
+      return 1;
+    }else if(t1->next == NULL || t2->next == NULL){
+      return 0;
+    }else{
+      return typeEq(t1->next, t2->next);
+    }
   }else{
     assert(0);
   }
@@ -123,11 +132,11 @@ int registerVariable(const char *name, Type *type, int isStructDec){
   if(isStructDec){
     printf("register struct %s as: ", name);
     printType(type);
-    printf("\n");
+    printf(" height: %d\n", symTabStackDepth);
   }else{
     printf("register variable %s of type: ", name);
     printType(type);
-    printf("\n");
+    printf(" height: %d\n", symTabStackDepth);
   }
 
   SymTabEntry *entry= malloc(sizeof(SymTabEntry));
@@ -236,6 +245,10 @@ void resolveExtDef(Tree *t){
         }
 
         curFunction = e;
+        for(ListNode *n=e->paramList->head;n;n=n->next){
+          Param *p = n->val;
+          registerVariable(p->name, p->type, 0);
+        }
         resolveCompSt(t->ch[2]);
       }
       symTabStackPop();
@@ -249,7 +262,7 @@ void resolveExtDecList(Tree *t){
   t->exp_type = t->ch[0]->exp_type;
   t->var_name = t->ch[0]->var_name;
   if(!registerVariable(t->var_name, t->exp_type, 0)){
-    sdd_error(3, "TODO", t);
+    sdd_error(3, "redefined global variable", t);
   }
   if(t->ch[2]){
     t->ch[2]->exp_type = t->exp_type;
@@ -284,7 +297,7 @@ void resolveStructSpecifier(Tree *t){
       const char *name = IDs[t->ch[1]->ch[0]->int_val];
       if(type){ //if struct has body
         if(!registerVariable(name, type, 1)){
-          sdd_error(16, "TODO", t);
+          sdd_error(16, "redefined struct", t);
         }
       }else{
         SymTabEntry *e = trieQuery(symTabStack.rear->val, name);
@@ -439,7 +452,9 @@ void resolveDec_fromCompSt(Tree *t){
   assert(t->exp_type);
   t->ch[0]->exp_type = t->exp_type;
   resolveVarDec(t->ch[0]);
-  registerVariable(t->ch[0]->var_name, t->ch[0]->exp_type, 0);
+  if(!registerVariable(t->ch[0]->var_name, t->ch[0]->exp_type, 0)){
+    sdd_error(3, "redefined variable", t);
+  }
 }
 
 void resolveDefList_fromStruct(Tree *t){
@@ -560,6 +575,7 @@ void resolveExp_FunCall(Tree *t){
   const char *name = IDs[t->ch[0]->int_val];
   SymTabEntry *funEntry = trieQuery(symTabFunctions, name);
   if(funEntry){
+    t->exp_type = funEntry->returnType;
     List *arg_list;
     if(t->ch[2]){ //has args
       resolveArgs(t->ch[2]);
