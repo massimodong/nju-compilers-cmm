@@ -46,7 +46,7 @@ static const char *syntaxName[] = {
 
 /*########### List ########*/
 typedef struct __ListNode{
-  struct __ListNode *last, *next;
+  struct __ListNode *prev, *next;
   void *val;
 }ListNode;
 
@@ -78,6 +78,7 @@ typedef struct{
 /*###########symbol table########*/
 typedef struct __SymTableEmtry{
   const char *name;
+  int depth;
   union{
     struct{
       int isStructDec;
@@ -94,7 +95,6 @@ typedef struct __SymTableEmtry{
 /*############ Trie #############*/
 typedef struct __Trie{
   struct __Trie *go[26+26+10+1];
-  int depth;
   SymTabEntry *entry;
 }Trie;
 

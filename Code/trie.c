@@ -7,15 +7,13 @@
 Trie *newTrieNode(Trie *ot){
   Trie *t = malloc(sizeof(Trie));
   if(ot) memcpy(t, ot, sizeof(Trie));
-  else{
-    //TODO: init trie
-  }
+  else memset(t, 0, sizeof(Trie));
   return t;
 }
 
 int trieCharId(char c){
   if('A' <= c && c <= 'Z') return c - 'A';
-  else if('a' <= c && c <= 'z') return c - 'z' + 26;
+  else if('a' <= c && c <= 'z') return c - 'a' + 26;
   else if('0' <= c && c <= '9') return c - '0' + 26 + 26;
   else if(c == '_') return 26 + 26 + 10;
   else assert(0);
@@ -31,16 +29,40 @@ SymTabEntry *trieQuery(Trie *t, const char *str){
   return t->entry;
 }
 
-int trieInsert(Trie **tp, const char *str, SymTabEntry *entry, int depth){
+void trieDfs(Trie *t){
+  for(int i=0;i<63;++i){
+    if(t->go[i]){
+      printf("go to %d\n", i);
+      trieDfs(t->go[i]);
+      printf("back\n");
+    }
+  }
+}
+
+int canUpdate(SymTabEntry *o, SymTabEntry *n){
+  if(o == NULL) return 1;
+  if(o->depth != n->depth){
+    assert(o->depth < n->depth);
+    return 1;
+  }
+  return 0;
+}
+
+int trieInsert(Trie **tp, const char *str, SymTabEntry *entry){
+  //printf("trie Insert %s\n", str);
   Trie *t = *tp = newTrieNode(*tp);
+  //trieDfs(t);
   for(int i=0;str[i];++i){
     int d = trieCharId(str[i]);
     t = t->go[d] = newTrieNode(t->go[d]);
   }
 
-  if(t->entry == NULL || t->depth != depth){
+  if(canUpdate(t->entry, entry)){
+    /*
+    if(t->entry == NULL) printf("entry is NULL\n");
+    else printf("entry is not NULL\n");
+    */
     t->entry = entry;
-    t->depth = depth;
     return 1;
   }else{
     return 0;

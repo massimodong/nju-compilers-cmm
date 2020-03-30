@@ -5,7 +5,7 @@
 
 ListNode *newListNode(void *v){
   ListNode *ret = malloc(sizeof(ListNode));
-  ret->last = ret->next = NULL;
+  ret->prev = ret->next = NULL;
   ret->val = v;
 }
 
@@ -16,7 +16,17 @@ void listAppend(List *l, void *v){
   }else{
     ListNode *n = newListNode(v);
     l->rear->next = n;
-    n->last = l->rear;
+    n->prev = l->rear;
     l->rear = n;
+  }
+}
+
+void listPopRear(List *l){ //TODO: maybe we can free space here
+  assert(l->head);
+  assert(l->rear);
+  if(l->head == l->rear){
+    l->head = l->rear = NULL;
+  }else{
+    l->rear = l->rear->prev;
   }
 }

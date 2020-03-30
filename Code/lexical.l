@@ -113,7 +113,7 @@ char **IDs = NULL;
 
 int cid = 0, sizeid = 0;
 
-int installID(){
+int installID(){ //TODO: don't need to check duplicate string
   //printf("install ID: %s\n", yytext);
   for(int i=0;i<cid;++i) if(strcmp(IDs[i], yytext) == 0) return i;
   if(cid == sizeid){

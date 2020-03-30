@@ -4,6 +4,10 @@
 #include <assert.h>
 
 extern char **IDs;
+int trieInsert(Trie **, const char *, SymTabEntry *);
+SymTabEntry *trieQuery(Trie *, const char *);
+void listAppend(List *, void *);
+void listPopRear(List *);
 
 Type *IntType, *FloatType; //TODO: need initialized
 
@@ -62,9 +66,20 @@ void printType(Type *t){
   }
 }
 
-/* register a variable, if collision, output error
+List symTabStack = (List){NULL, NULL};
+int symTabStackDepth = 0;
+void symTabStackPush(){
+  listAppend(&symTabStack, symTabStack.rear->val);
+  ++symTabStackDepth;
+}
+void symTabStackPop(){
+  --symTabStackDepth;
+  listPopRear(&symTabStack);
+}
+
+/* register a variable, return whether success
  */
-void registerVariable(const char *name, Type *type, int isStructDec){
+int registerVariable(const char *name, Type *type, int isStructDec){
   if(isStructDec){
     printf("register struct %s as: ", name);
     printType(type);
@@ -74,9 +89,14 @@ void registerVariable(const char *name, Type *type, int isStructDec){
     printType(type);
     printf("\n");
   }
-  return;
-  assert(0);
-  //TODO
+
+  SymTabEntry *entry= malloc(sizeof(SymTabEntry));
+  entry->name = name;
+  entry->depth = symTabStackDepth;
+  entry->isStructDec = isStructDec;
+  entry->type = type;
+
+  return trieInsert(&symTabStack.rear->val, name, entry);
 }
 
 
@@ -103,6 +123,10 @@ void resolveProgram(Tree *t){
   FloatType = newType();
   IntType->type = 0;
   FloatType->type = 1;
+
+  listAppend(&symTabStack, NULL);
+  symTabStackDepth = 1;
+
   resolveExtDefList(t->ch[0]);
 }
 
@@ -142,7 +166,9 @@ void resolveExtDecList(Tree *t){
   resolveVarDec(t->ch[0]);
   t->exp_type = t->ch[0]->exp_type;
   t->var_name = t->ch[0]->var_name;
-  registerVariable(t->var_name, t->exp_type, 0);
+  if(!registerVariable(t->var_name, t->exp_type, 0)){
+    sdd_error(3, "TODO", t);
+  }
   if(t->ch[2]){
     t->ch[2]->exp_type = t->exp_type;
     resolveExtDecList(t->ch[2]);
@@ -164,11 +190,24 @@ void resolveSpecifier(Tree *t){
 void resolveStructSpecifier(Tree *t){
     Type *type = NULL;
     if(t->ch[3]){ //if defined body
+      symTabStackPush();
       resolveDefList_fromStruct(t->ch[3]);
+      symTabStackPop();
       type = t->ch[3]->exp_type;
     }
     if(t->ch[1]->show){ //Tag name is not empty
-      registerVariable(IDs[t->ch[1]->ch[0]->int_val], type, 1);
+      const char *name = IDs[t->ch[1]->ch[0]->int_val];
+      if(type){ //if struct has body
+        if(!registerVariable(name, type, 1)){
+          sdd_error(16, "TODO", t);
+        }
+      }else{
+        SymTabEntry *e = trieQuery(symTabStack.rear->val, name);
+        if(e){
+          if(e->isStructDec) type = e->type;
+          else sdd_error(16, "TODO", t);
+        }
+      }
     }
     t->exp_type = type;
 }
