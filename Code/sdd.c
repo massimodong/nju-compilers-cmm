@@ -28,22 +28,6 @@ StructEntry *makeStructEntry(Type *t, const char *name){
   se->name = name;
   return se;
 }
-int structConstructMap(Type *t){
-  t->map = NULL;
-  int ok = 1;
-  for(ListNode *n = t->structList->head;n;n=n->next){
-    StructEntry *se = n->val;
-    SymTabEntry *entry = malloc(sizeof(SymTabEntry));
-    entry->name = se->name;
-    entry->depth = 0;
-    entry->isStructDec = 0;
-    entry->type = se->type;
-    if(!trieInsert(&t->map, se->name, entry)){
-      ok = 0;
-    }
-  }
-  return ok;
-}
 List *makeParam(const char *name, Type *type){
   Param *param = malloc(sizeof(Param));
   param->type = type;
@@ -75,8 +59,8 @@ int typeEq(Type *t1, Type *t2){
 }
 
 void printType(Type *t){
-  if(t == NULL) printf("<undefined>");
-  else if(t->type == 0) printf("int");
+  assert(t);
+  if(t->type == 0) printf("int");
   else if(t->type == 1) printf("float");
   else if(t->type == 2){
     printf("array(%d, ", t->size);
@@ -110,6 +94,7 @@ void symTabStackPop(){
 /* register a variable, return whether success
  */
 int registerVariable(const char *name, Type *type, int isStructDec){
+  /*
   if(isStructDec){
     printf("register struct %s as: ", name);
     printType(type);
@@ -119,6 +104,7 @@ int registerVariable(const char *name, Type *type, int isStructDec){
     printType(type);
     printf(" height: %d\n", symTabStackDepth);
   }
+  */
 
   SymTabEntry *entry= malloc(sizeof(SymTabEntry));
   entry->name = name;
@@ -129,9 +115,11 @@ int registerVariable(const char *name, Type *type, int isStructDec){
   return trieInsert(&symTabStack.rear->val, name, entry);
 }
 
-Trie *symTabFunctions;
+Trie *symTabFunctions = NULL;
 SymTabEntry *curFunction;
-int registerFunction(const char *name, Type *retType, List *paramList){
+List functionsList = (List){NULL, NULL};
+int registerFunction(const char *name, Type *retType, List *paramList, int lineno){
+  /*
   printf("register function ");
   printType(retType);
   printf(" <%s>(", name);
@@ -141,19 +129,39 @@ int registerFunction(const char *name, Type *retType, List *paramList){
     printf(" %s,", p->name);
   }
   printf(")\n");
+  */
+
   SymTabEntry *entry = malloc(sizeof(SymTabEntry));
   entry->name = name;
   entry->depth = 0;
   entry->returnType = retType;
   entry->paramList = paramList;
   entry->defined = 0;
+  entry->lineno = lineno;
 
-  return trieInsert(&symTabFunctions, name, entry);
+  if(trieInsert(&symTabFunctions, name, entry)){
+    listAppend(&functionsList, entry);
+    return 1;
+  }else{
+    return 0;
+  }
 }
 
+void sdd_error_lineno(int n, const char *msg, int lineno){
+  printf("Error type %d at Line %d: %s.\n", n, lineno, msg);
+}
 
 void sdd_error(int n, const char *msg, Tree *t){
-  printf("Error type %d at Line %d: %s.\n", n, t->lineno, msg);
+  sdd_error_lineno(n, msg, t->lineno);
+}
+
+void checkUndefinedFunctions(){
+  for(ListNode *n = functionsList.head;n;n=n->next){
+    SymTabEntry *entry = n->val;
+    if(!entry->defined){
+      sdd_error_lineno(18, "declared function has no definition", entry->lineno);
+    }
+  }
 }
 
 void resolveProgram(Tree *);
@@ -176,10 +184,10 @@ void resolveDef_fromCompSt(Tree *);
 void resolveDecList_fromCompSt(Tree *); //inh: type
 void resolveDec_fromCompSt(Tree *); //inh: type; registers variables
 
-void resolveDefList_fromStruct(Tree *); //inh: var_list (to be filled)
-void resolveDef_fromStruct(Tree *); //inh: var_list (to be filled)
-void resolveDecList_fromStruct(Tree *); //inh: var_list (to be filled)
-void resolveDec_fromStruct(Tree *); //inh: var_list (to be filled)
+void resolveDefList_fromStruct(Tree *); //inh: struct_type (to be filled)
+void resolveDef_fromStruct(Tree *); //inh: struct_type (to be filled)
+void resolveDecList_fromStruct(Tree *); //inh: struct_type (to be filled), exp_type
+void resolveDec_fromStruct(Tree *); //inh: struct_type (to be filled), exp_type
 
 void resolveExp(Tree *); //syn: exp_type
 void resolveArgs(Tree *); //syn: arg_list
@@ -194,6 +202,8 @@ void resolveProgram(Tree *t){
   symTabStackDepth = 1;
 
   resolveExtDefList(t->ch[0]);
+
+  checkUndefinedFunctions();
 }
 
 void resolveExtDefList(Tree *t){
@@ -270,7 +280,6 @@ void resolveStructSpecifier(Tree *t){
       type->type = 3;
       type->structList = newList();
       type->map = NULL;
-      type->next = NULL;
 
       t->ch[3]->struct_type = type;
       symTabStackPush();
@@ -331,7 +340,7 @@ void resolveFunDec(Tree *t){
 
   SymTabEntry *funEntry = trieQuery(symTabFunctions, t->var_name);
   if(funEntry == NULL){
-    registerFunction(t->var_name, t->exp_type, paramList);
+    registerFunction(t->var_name, t->exp_type, paramList, t->lineno);
   }else{
     //check if two function declarations are equivalent
     if(!(typeEq(t->exp_type, funEntry->returnType) && paramListEq(paramList, funEntry->paramList))){
@@ -438,6 +447,13 @@ void resolveDec_fromCompSt(Tree *t){
   resolveVarDec(t->ch[0]);
   if(!registerVariable(t->ch[0]->var_name, t->ch[0]->exp_type, 0)){
     sdd_error(3, "redefined variable", t);
+  }
+
+  if(t->ch[2]){
+    resolveExp(t->ch[2]);
+    if(!typeEq(t->ch[0]->exp_type, t->ch[2]->exp_type)){
+      sdd_error(5, "variable initialized with inconsistent type", t);
+    }
   }
 }
 

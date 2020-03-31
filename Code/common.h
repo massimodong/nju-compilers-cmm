@@ -113,7 +113,7 @@ typedef struct __SymTableEmtry{
     struct{
       Type *returnType;
       List *paramList;
-      int defined;
+      int defined, lineno;
     };
   };
 }SymTabEntry;
