@@ -4,6 +4,10 @@
 #include <assert.h>
 #include "syntax.tab.h"
 
+void sdd_error_lineno(int n, const char *msg, int lineno){
+  printf("Error type %d at Line %d: %s.\n", n, lineno, msg);
+}
+
 extern char **IDs;
 int trieInsert(Trie **, const char *, SymTabEntry *);
 SymTabEntry *trieQuery(Trie *, const char *);
@@ -80,6 +84,7 @@ void printType(Type *t){
   }
 }
 
+Trie *symTabStructs;
 List symTabStack = (List){NULL, NULL};
 int symTabStackDepth = 0;
 void symTabStackPush(){
@@ -93,7 +98,7 @@ void symTabStackPop(){
 
 /* register a variable, return whether success
  */
-int registerVariable(const char *name, Type *type, int isStructDec){
+void registerVariable(const char *name, Type *type, int lineno){
   /*
   if(isStructDec){
     printf("register struct %s as: ", name);
@@ -106,13 +111,45 @@ int registerVariable(const char *name, Type *type, int isStructDec){
   }
   */
 
+  SymTabEntry *structEntry = trieQuery(symTabStructs, name);
+  if(structEntry){
+    sdd_error_lineno(3, "struct name can't be used as variable name", lineno);
+    return;
+  }
+
+  SymTabEntry *varEntry = trieQuery(symTabStack.rear->val, name);
+  if(varEntry && varEntry->depth == symTabStackDepth){
+    sdd_error_lineno(3, "variable redefined", lineno);
+    return;
+  }
+
   SymTabEntry *entry= malloc(sizeof(SymTabEntry));
   entry->name = name;
   entry->depth = symTabStackDepth;
-  entry->isStructDec = isStructDec;
   entry->type = type;
 
-  return trieInsert(&symTabStack.rear->val, name, entry);
+  trieInsert(&symTabStack.rear->val, name, entry);
+}
+
+void registerStruct(const char *name, Type *type, int lineno){
+  SymTabEntry *varEntry = trieQuery(symTabStack.rear->val, name);
+  if(varEntry){
+    sdd_error_lineno(16, "variable name can't be used as struct name", lineno);
+    return;
+  }
+
+  SymTabEntry *structEntry = trieQuery(symTabStructs, name);
+  if(structEntry){
+    sdd_error_lineno(16, "struct redefined", lineno);
+    return;
+  }
+
+  SymTabEntry *entry = malloc(sizeof(SymTabEntry));
+  entry->name = name;
+  entry->depth = 0;
+  entry->type = type;
+
+  trieInsert(&symTabStructs, name, entry);
 }
 
 Trie *symTabFunctions = NULL;
@@ -145,10 +182,6 @@ int registerFunction(const char *name, Type *retType, List *paramList, int linen
   }else{
     return 0;
   }
-}
-
-void sdd_error_lineno(int n, const char *msg, int lineno){
-  printf("Error type %d at Line %d: %s.\n", n, lineno, msg);
 }
 
 void sdd_error(int n, const char *msg, Tree *t){
@@ -238,7 +271,7 @@ void resolveExtDef(Tree *t){
         curFunction = e;
         for(ListNode *n=e->paramList->head;n;n=n->next){
           Param *p = n->val;
-          registerVariable(p->name, p->type, 0);
+          registerVariable(p->name, p->type, t->lineno);
         }
         resolveCompSt(t->ch[2]);
       }
@@ -252,9 +285,7 @@ void resolveExtDecList(Tree *t){
   resolveVarDec(t->ch[0]);
   t->exp_type = t->ch[0]->exp_type;
   t->var_name = t->ch[0]->var_name;
-  if(!registerVariable(t->var_name, t->exp_type, 0)){
-    sdd_error(3, "redefined global variable", t);
-  }
+  registerVariable(t->var_name, t->exp_type, t->lineno);
   if(t->ch[2]){
     t->ch[2]->exp_type = t->exp_type;
     resolveExtDecList(t->ch[2]);
@@ -289,17 +320,11 @@ void resolveStructSpecifier(Tree *t){
     if(t->ch[1]->show){ //Tag name is not empty
       const char *name = IDs[t->ch[1]->ch[0]->int_val];
       if(type){ //if struct has body
-        if(!registerVariable(name, type, 1)){
-          sdd_error(16, "redefined struct", t);
-        }
+        registerStruct(name, type, t->lineno);
       }else{
-        SymTabEntry *e = trieQuery(symTabStack.rear->val, name);
+        SymTabEntry *e = trieQuery(symTabStructs, name);
         if(e){
-          if(e->isStructDec) type = e->type;
-          else{
-            type = IntType;
-            sdd_error(16, "not a struct", t);
-          }
+          type = e->type;
         }else{
           type = IntType;
           sdd_error(17, "struct not defined", t);
@@ -445,9 +470,7 @@ void resolveDec_fromCompSt(Tree *t){
   assert(t->exp_type);
   t->ch[0]->exp_type = t->exp_type;
   resolveVarDec(t->ch[0]);
-  if(!registerVariable(t->ch[0]->var_name, t->ch[0]->exp_type, 0)){
-    sdd_error(3, "redefined variable", t);
-  }
+  registerVariable(t->ch[0]->var_name, t->ch[0]->exp_type, t->lineno);
 
   if(t->ch[2]){
     resolveExp(t->ch[2]);
@@ -502,7 +525,6 @@ void resolveDec_fromStruct(Tree *t){
   SymTabEntry *entry = malloc(sizeof(SymTabEntry));
   entry->name = se->name;
   entry->depth = 0;
-  entry->isStructDec = 0;
   entry->type = se->type;
 
   if(!trieInsert(&t->struct_type->map, se->name, entry)){

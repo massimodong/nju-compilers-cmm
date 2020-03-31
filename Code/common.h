@@ -107,7 +107,6 @@ typedef struct __SymTableEmtry{
   int depth;
   union{
     struct{
-      int isStructDec;
       Type *type;
     };
     struct{

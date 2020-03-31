@@ -39,16 +39,7 @@ void trieDfs(Trie *t){
   }
 }
 
-int canUpdate(SymTabEntry *o, SymTabEntry *n){
-  if(o == NULL) return 1;
-  if(o->depth != n->depth){
-    assert(o->depth < n->depth);
-    return 1;
-  }
-  return 0;
-}
-
-int trieInsert(Trie **tp, const char *str, SymTabEntry *entry){
+void trieInsert(Trie **tp, const char *str, SymTabEntry *entry){
   //printf("trie Insert %s\n", str);
   Trie *t = *tp = newTrieNode(*tp);
   //trieDfs(t);
@@ -57,10 +48,5 @@ int trieInsert(Trie **tp, const char *str, SymTabEntry *entry){
     t = t->go[d] = newTrieNode(t->go[d]);
   }
 
-  if(canUpdate(t->entry, entry)){
-    t->entry = entry;
-    return 1;
-  }else{
-    return 0;
-  }
+  t->entry = entry;
 }
