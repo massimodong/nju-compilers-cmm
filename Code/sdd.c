@@ -522,13 +522,14 @@ void resolveDec_fromStruct(Tree *t){
   assert(t->struct_type->structList);
   listAppend(t->struct_type->structList, se);
 
-  SymTabEntry *entry = malloc(sizeof(SymTabEntry));
-  entry->name = se->name;
-  entry->depth = 0;
-  entry->type = se->type;
-
-  if(!trieInsert(&t->struct_type->map, se->name, entry)){
+  if(trieQuery(t->struct_type->map, se->name)){
     sdd_error(15, "redefined struct member", t);
+  }else{
+    SymTabEntry *entry = malloc(sizeof(SymTabEntry));
+    entry->name = se->name;
+    entry->depth = 0;
+    entry->type = se->type;
+    trieInsert(&t->struct_type->map, se->name, entry);
   }
 }
 
