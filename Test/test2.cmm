@@ -13,5 +13,3 @@ struct UnDef;
 int;
 
 struct UnDef2;
-
-int i;

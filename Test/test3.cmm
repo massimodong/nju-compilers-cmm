@@ -1,9 +1,0 @@
-struct Point;
-
-struct Point{
-  int x, y;
-  int x;
-  float weight;
-};
-
-struct Point a, b[10];

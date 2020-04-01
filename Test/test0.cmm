@@ -1,3 +1,7 @@
-struct Point{
-  int x = 10;
+int main(){
+  int a;
+}
+
+struct a{
+  int b;
 };
