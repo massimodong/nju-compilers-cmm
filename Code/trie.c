@@ -4,11 +4,17 @@
 #include <string.h>
 #include <stdlib.h>
 
-Trie *newTrieNode(Trie *ot){
-  Trie *t = malloc(sizeof(Trie));
-  if(ot) memcpy(t, ot, sizeof(Trie));
-  else memset(t, 0, sizeof(Trie));
-  return t;
+Trie *newTrieNode(Trie *ot, int depth){
+  if(ot == NULL || ot->depth != depth){
+    if(ot) assert(ot->depth < depth);
+    Trie *t = malloc(sizeof(Trie));
+    if(ot) memcpy(t, ot, sizeof(Trie));
+    else memset(t, 0, sizeof(Trie));
+    t->depth = depth;
+    return t;
+  }else{
+    return ot;
+  }
 }
 
 int trieCharId(char c){
@@ -41,11 +47,11 @@ void trieDfs(Trie *t){
 
 void trieInsert(Trie **tp, const char *str, SymTabEntry *entry){
   //printf("trie Insert %s\n", str);
-  Trie *t = *tp = newTrieNode(*tp);
+  Trie *t = *tp = newTrieNode(*tp, entry->depth);
   //trieDfs(t);
   for(int i=0;str[i];++i){
     int d = trieCharId(str[i]);
-    t = t->go[d] = newTrieNode(t->go[d]);
+    t = t->go[d] = newTrieNode(t->go[d], entry->depth);
   }
 
   t->entry = entry;

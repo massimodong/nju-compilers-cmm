@@ -121,6 +121,7 @@ typedef struct __SymTableEmtry{
 typedef struct __Trie{
   struct __Trie *go[26+26+10+1];
   SymTabEntry *entry;
+  int depth;
 }Trie;
 
 /************ Tree ***************/
