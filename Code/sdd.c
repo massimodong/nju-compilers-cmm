@@ -4,6 +4,8 @@
 #include <assert.h>
 #include "syntax.tab.h"
 
+//#define PRINTREGISTERS 1
+
 void sdd_error_lineno(int n, const char *msg, int lineno){
   printf("Error type %d at Line %d: %s.\n", n, lineno, msg);
 }
@@ -99,17 +101,11 @@ void symTabStackPop(){
 /* register a variable, return whether success
  */
 void registerVariable(const char *name, Type *type, int lineno){
-  /*
-  if(isStructDec){
-    printf("register struct %s as: ", name);
-    printType(type);
-    printf(" height: %d\n", symTabStackDepth);
-  }else{
-    printf("register variable %s of type: ", name);
-    printType(type);
-    printf(" height: %d\n", symTabStackDepth);
-  }
-  */
+#ifdef PRINTREGISTERS
+  printf("register variable %s of type: ", name);
+  printType(type);
+  printf(" height: %d\n", symTabStackDepth);
+#endif
 
   SymTabEntry *structEntry = trieQuery(symTabStructs, name);
   if(structEntry){
@@ -132,6 +128,17 @@ void registerVariable(const char *name, Type *type, int lineno){
 }
 
 void registerStruct(const char *name, Type *type, int lineno){
+#ifdef PRINTREGISTERS
+  printf("register struct %s{", name);
+  for(ListNode *n = type->structList->head;n;n=n->next){
+    StructEntry *entry = n->val;
+    printf("%s ", entry->name);
+    printType(entry->type);
+    if(n->next) printf(", ");
+  }
+  printf("}\n");
+#endif
+
   SymTabEntry *varEntry = trieQuery(symTabStack.rear->val, name);
   if(varEntry){
     sdd_error_lineno(16, "variable name can't be used as struct name", lineno);
@@ -156,7 +163,7 @@ Trie *symTabFunctions = NULL;
 SymTabEntry *curFunction;
 List functionsList = (List){NULL, NULL};
 int registerFunction(const char *name, Type *retType, List *paramList, int lineno){
-  /*
+#ifdef PRINTREGISTERS
   printf("register function ");
   printType(retType);
   printf(" <%s>(", name);
@@ -166,7 +173,7 @@ int registerFunction(const char *name, Type *retType, List *paramList, int linen
     printf(" %s,", p->name);
   }
   printf(")\n");
-  */
+#endif
 
   SymTabEntry *entry = malloc(sizeof(SymTabEntry));
   entry->name = name;
@@ -283,9 +290,9 @@ void resolveExtDef(Tree *t){
 void resolveExtDecList(Tree *t){
   t->ch[0]->exp_type = t->exp_type;
   resolveVarDec(t->ch[0]);
-  t->exp_type = t->ch[0]->exp_type;
-  t->var_name = t->ch[0]->var_name;
-  registerVariable(t->var_name, t->exp_type, t->lineno);
+  Type *type = t->ch[0]->exp_type;
+  const char *name = t->ch[0]->var_name;
+  registerVariable(name, type, t->ch[0]->lineno);
   if(t->ch[2]){
     t->ch[2]->exp_type = t->exp_type;
     resolveExtDecList(t->ch[2]);
@@ -470,7 +477,7 @@ void resolveDec_fromCompSt(Tree *t){
   assert(t->exp_type);
   t->ch[0]->exp_type = t->exp_type;
   resolveVarDec(t->ch[0]);
-  registerVariable(t->ch[0]->var_name, t->ch[0]->exp_type, t->lineno);
+  registerVariable(t->ch[0]->var_name, t->ch[0]->exp_type, t->ch[0]->lineno);
 
   if(t->ch[2]){
     resolveExp(t->ch[2]);
