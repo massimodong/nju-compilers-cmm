@@ -67,10 +67,23 @@ typedef struct{
   ListNode *head, *rear;
 }List;
 
+/********* IntListHash ******/
+#define HASH_NUM 3
+#define LIST_HASH_MAX 4
+
+static const int MOD[HASH_NUM] = { // a list of different large primes
+  1372212617, 1000000007, 998244353,
+};
+
+typedef struct __IntListHash{
+  int v[HASH_NUM], len[HASH_NUM];
+}IntListHash;
+
 /*########### Type ########*/
 struct __Trie;
 typedef struct __Type{
   int type; // 0 for int, 1 for float, 2 for array, 3 for struct
+  IntListHash hash; //used for determine struct eq
 
   union{
     struct{

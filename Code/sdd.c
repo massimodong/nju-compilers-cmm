@@ -17,6 +17,10 @@ void listAppend(List *, void *);
 void listPopRear(List *);
 List *listMerge(List *, List *);
 List *newList();
+IntListHash ListHashAppendNum(IntListHash, int);
+IntListHash ListHashAppend(IntListHash, IntListHash);
+void ListHashInit(IntListHash *, int);
+int ListHashEq(IntListHash a, IntListHash b);
 
 Type *IntType, *FloatType;
 
@@ -25,6 +29,8 @@ Type *makeArray(Type *t, int n){
   ret->type = 2;
   ret->size = n;
   ret->next = t;
+  ListHashInit(&ret->hash, 2);
+  ret->hash = ListHashAppend(ret->hash, t->hash);
   return ret;
 }
 StructEntry *makeStructEntry(Type *t, const char *name){
@@ -44,6 +50,7 @@ List *makeParam(const char *name, Type *type){
 }
 
 int typeEq(Type *t1, Type *t2){
+  /*
   if(t1->type == 0) return t2->type == 0;
   else if(t1->type == 1) return t2->type == 1;
   else if(t1->type == 2){
@@ -62,6 +69,8 @@ int typeEq(Type *t1, Type *t2){
   }else{
     assert(0);
   }
+  */
+  return ListHashEq(t1->hash, t2->hash);
 }
 
 void printType(Type *t){
@@ -84,6 +93,7 @@ void printType(Type *t){
     }
     printf("}");
   }
+  printf(" (%d)", t->hash.v[0]);
 }
 
 Trie *symTabStructs;
@@ -237,6 +247,8 @@ void resolveProgram(Tree *t){
   FloatType = malloc(sizeof(Type));
   IntType->type = 0;
   FloatType->type = 1;
+  ListHashInit(&IntType->hash, 0);
+  ListHashInit(&FloatType->hash, 1);
 
   listAppend(&symTabStack, NULL);
   symTabStackDepth = 1;
@@ -323,6 +335,12 @@ void resolveStructSpecifier(Tree *t){
       symTabStackPush();
       resolveDefList_fromStruct(t->ch[3]);
       symTabStackPop();
+
+      ListHashInit(&type->hash, 3);
+      for(ListNode *n = type->structList->head;n;n=n->next){
+        StructEntry *entry = n->val;
+        type->hash = ListHashAppend(type->hash, entry->type->hash);
+      }
     }
     if(t->ch[1]->show){ //Tag name is not empty
       const char *name = IDs[t->ch[1]->ch[0]->int_val];
