@@ -341,6 +341,7 @@ void resolveStructSpecifier(Tree *t){
         StructEntry *entry = n->val;
         type->hash = ListHashAppend(type->hash, entry->type->hash);
       }
+      type->hash = ListHashAppendNum(type->hash, 4);
     }
     if(t->ch[1]->show){ //Tag name is not empty
       const char *name = IDs[t->ch[1]->ch[0]->int_val];

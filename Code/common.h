@@ -69,7 +69,7 @@ typedef struct{
 
 /********* IntListHash ******/
 #define HASH_NUM 3
-#define LIST_HASH_MAX 4
+#define LIST_HASH_MAX 5
 
 static const int MOD[HASH_NUM] = { // a list of different large primes
   1372212617, 1000000007, 998244353,
