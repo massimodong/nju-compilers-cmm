@@ -1,4 +1,0 @@
-struct T{
-  int a;
-  struct T b;
-};
