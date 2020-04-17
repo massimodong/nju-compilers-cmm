@@ -4,6 +4,12 @@
 #include <string.h>
 #include <stdlib.h>
 
+/* Trie datatype
+ * to make a new snapshot of a tree,
+ * simply create a new pointer pointing to the root, and make all subsequent modifies to the new pointer.
+ * Then the original pointer will be a snapshot.
+ */
+
 Trie *newTrieNode(Trie *ot, int depth){
   if(ot == NULL || ot->depth != depth){
     if(ot) assert(ot->depth < depth);
