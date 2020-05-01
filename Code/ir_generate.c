@@ -102,6 +102,16 @@ static void printIR(IRCode ir){
     case OP_ADD:
       fprintf(fir, "t%d := t%d + t%d\n", ir.dst, ir.src1, ir.src2);
       break;
+    case OP_SUB:
+      fprintf(fir, "t%d := t%d - t%d\n", ir.dst, ir.src1, ir.src2);
+      break;
+    case OP_MUL:
+      fprintf(fir, "t%d := t%d * t%d\n", ir.dst, ir.src1, ir.src2);
+      break;
+    case OP_DIV:
+      fprintf(fir, "t%d := t%d / t%d\n", ir.dst, ir.src1, ir.src2);
+      break;
+
     case OP_RETURN:
       fprintf(fir, "RETURN t%d\n", ir.src1);
       break;
@@ -267,6 +277,21 @@ static void irExp(Tree *t, int true_label, int false_label){
       irExp(t->ch[0], 0, 0);
       irExp(t->ch[2], 0, 0);
       code(OP_ADD, t->label, t->ch[0]->label, t->ch[2]->label);
+      break;
+    case Exp_MINUS:
+      irExp(t->ch[0], 0, 0);
+      irExp(t->ch[2], 0, 0);
+      code(OP_SUB, t->label, t->ch[0]->label, t->ch[2]->label);
+      break;
+    case Exp_STAR:
+      irExp(t->ch[0], 0, 0);
+      irExp(t->ch[2], 0, 0);
+      code(OP_MUL, t->label, t->ch[0]->label, t->ch[2]->label);
+      break;
+    case Exp_DIV:
+      irExp(t->ch[0], 0, 0);
+      irExp(t->ch[2], 0, 0);
+      code(OP_DIV, t->label, t->ch[0]->label, t->ch[2]->label);
       break;
     case Exp_FunCall:
       irExp_FunCall(t);
