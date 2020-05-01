@@ -160,6 +160,22 @@ static void irStmt(Tree *t){
       irExp(t->ch[1], 0, 0);
       code(OP_RETURN, 0, t->ch[1]->label, 0);
       break;
+    case Stmt_If:
+      if(t->ch[6]){
+        int false_label = ++label_cnt, end_label = ++label_cnt;
+        irExp(t->ch[2], 0, false_label);
+        irStmt(t->ch[4]);
+        code(OP_GOTO, end_label, 0, 0);
+        code(OP_LABEL, 0, false_label, 0);
+        irStmt(t->ch[6]);
+        code(OP_LABEL, 0, end_label, 0);
+      }else{
+        int end_label = ++label_cnt;
+        irExp(t->ch[2], 0, end_label);
+        irStmt(t->ch[4]);
+        code(OP_LABEL, 0, end_label, 0);
+      }
+      break;
     default:
       assert(0);
   }
