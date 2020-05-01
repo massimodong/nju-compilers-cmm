@@ -153,6 +153,9 @@ static void irStmt(Tree *t){
     case Stmt_Exp:
       irExp(t->ch[0], 0, 0);
       break;
+    case Stmt_CompSt:
+      irCompSt(t->ch[0]);
+      break;
     case Stmt_Return:
       irExp(t->ch[1], 0, 0);
       code(OP_RETURN, 0, t->ch[1]->label, 0);
