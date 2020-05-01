@@ -31,6 +31,7 @@ Type *IntType, *FloatType;
 Type *makeArray(Type *t, int n){
   Type *ret = malloc(sizeof(Type));
   ret->type = 2;
+  ret->totsize = n * t->totsize;
   ret->size = n;
   ret->next = t;
   ListHashInit(&ret->hash, 2);
@@ -97,7 +98,7 @@ void printType(Type *t){
     }
     printf("}");
   }
-  printf(" (%d)", t->hash.v[0]);
+  printf(" (%d) -- (size: %d)", t->hash.v[0], t->totsize);
 }
 
 Trie *symTabStructs;
@@ -253,6 +254,7 @@ void resolveProgram(Tree *t){
   FloatType->type = 1;
   ListHashInit(&IntType->hash, 0);
   ListHashInit(&FloatType->hash, 1);
+  IntType->totsize = FloatType->totsize = 4;
 
   listAppend(&symTabStack, NULL);
   symTabStackDepth = 1;
@@ -348,12 +350,19 @@ void resolveStructSpecifier(Tree *t){
       resolveDefList_fromStruct(t->ch[3]);
       symTabStackPop();
 
+      int totsize = 0;
+
       ListHashInit(&type->hash, 3);
       for(ListNode *n = type->structList->head;n;n=n->next){
         StructEntry *entry = n->val;
         type->hash = ListHashAppend(type->hash, entry->type->hash);
+
+        entry->offset = totsize;
+        totsize += entry->type->totsize;
       }
       type->hash = ListHashAppendNum(type->hash, 4);
+
+      type->totsize = totsize;
     }
     if(t->ch[1]->show){ //Tag name is not empty
       const char *name = IDs[t->ch[1]->ch[0]->int_val];

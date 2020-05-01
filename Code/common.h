@@ -103,6 +103,8 @@ typedef struct __Type{
   int type; // 0 for int, 1 for float, 2 for array, 3 for struct
   IntListHash hash; //used for determine struct eq
 
+  int totsize;
+
   union{
     struct{
       int size; //for array
@@ -129,6 +131,7 @@ typedef struct{
 typedef struct{
   Type *type;
   const char *name;
+  int offset;
 }StructEntry;
 
 
