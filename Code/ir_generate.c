@@ -176,6 +176,15 @@ static void irStmt(Tree *t){
         code(OP_LABEL, 0, end_label, 0);
       }
       break;
+    case Stmt_While: {
+      int start_label = ++label_cnt, end_label = ++label_cnt;
+      code(OP_LABEL, 0, start_label, 0);
+      irExp(t->ch[2], 0, end_label);
+      irStmt(t->ch[4]);
+      code(OP_GOTO, start_label, 0, 0);
+      code(OP_LABEL, 0, end_label, 0);
+    }
+      break;
     default:
       assert(0);
   }
@@ -282,6 +291,7 @@ static void irExp(Tree *t, int true_label, int false_label){
           assert(0);
           break;
       }
+      t->label = t->ch[2]->label;
       break;
     case Exp_AND:
       irAnd(t); //TODO: optimize: goto true or false label now
