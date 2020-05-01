@@ -83,8 +83,20 @@ static void printIR(IRCode ir){
     case OP_IFG_GOTO:
       fprintf(fir, "IF t%d > t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
       break;
+    case OP_IFL_GOTO:
+      fprintf(fir, "IF t%d < t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
+      break;
+    case OP_IFGE_GOTO:
+      fprintf(fir, "IF t%d >= t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
+      break;
+    case OP_IFLE_GOTO:
+      fprintf(fir, "IF t%d <= t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
+      break;
     case OP_IFEQ_GOTO:
       fprintf(fir, "IF t%d == t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
+      break;
+    case OP_IFNE_GOTO:
+      fprintf(fir, "IF t%d != t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
       break;
 
     case OP_ADD:
@@ -177,6 +189,37 @@ static void irOr(Tree *t){
   code(OP_LABEL, 0, end_label, 0);
 }
 
+static void irRelop(Tree *t){
+  int true_label = ++label_cnt, end_label = ++label_cnt;
+  irExp(t->ch[0], 0, 0);
+  irExp(t->ch[2], 0, 0);
+  switch(t->ch[1]->int_val){
+    case REL_G:
+      code(OP_IFG_GOTO, true_label, t->ch[0]->label, t->ch[2]->label);
+      break;
+    case REL_L:
+      code(OP_IFL_GOTO, true_label, t->ch[0]->label, t->ch[2]->label);
+      break;
+    case REL_GE:
+      code(OP_IFGE_GOTO, true_label, t->ch[0]->label, t->ch[2]->label);
+      break;
+    case REL_LE:
+      code(OP_IFLE_GOTO, true_label, t->ch[0]->label, t->ch[2]->label);
+      break;
+    case REL_EQ:
+      code(OP_IFEQ_GOTO, true_label, t->ch[0]->label, t->ch[2]->label);
+      break;
+    case REL_NE:
+      code(OP_IFNE_GOTO, true_label, t->ch[0]->label, t->ch[2]->label);
+      break;
+  }
+  code(OP_LOAD_IMM, t->label, 0, 0);
+  code(OP_GOTO, end_label, 0, 0);
+  code(OP_LABEL, 0, true_label, 0);
+  code(OP_LOAD_IMM, t->label, 1, 0);
+  code(OP_LABEL, 0, end_label, 0);
+}
+
 static void irExp_FunCall(Tree *t){
   const char *funName = IDs[t->ch[0]->int_val];
 
@@ -218,7 +261,7 @@ static void irExp(Tree *t, int true_label, int false_label){
       irOr(t);
       break;
     case Exp_RELOP:
-      assert(0);
+      irRelop(t);
       break;
     case Exp_PLUS:
       irExp(t->ch[0], 0, 0);

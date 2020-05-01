@@ -33,7 +33,12 @@ ID      ({letter}|_)({letter}|_|{digit})*
 SEMI    ;
 COMMA   ,
 ASSIGNOP  =
-RELOP   (>)|(<)|(>=)|(<=)|(==)|(!=)
+REL_G   >
+REL_L   <
+REL_GE  >=
+REL_LE  <=
+REL_EQ  ==
+REL_NE  !=
 PLUS    \+
 MINUS   -
 STAR    \*
@@ -77,7 +82,12 @@ WHILE   while
 {SEMI}        {tokenInit(&yylval, SEMI); return SEMI;}
 {COMMA}       {tokenInit(&yylval, COMMA); return COMMA;}
 {ASSIGNOP}    {tokenInit(&yylval, ASSIGNOP); return ASSIGNOP;}
-{RELOP}       {tokenInit(&yylval, RELOP); return RELOP;}
+{REL_G}       {tokenInit(&yylval, RELOP); yylval->int_val = REL_G; return RELOP;}
+{REL_L}       {tokenInit(&yylval, RELOP); yylval->int_val = REL_L; return RELOP;}
+{REL_GE}      {tokenInit(&yylval, RELOP); yylval->int_val = REL_GE; return RELOP;}
+{REL_LE}      {tokenInit(&yylval, RELOP); yylval->int_val = REL_LE; return RELOP;}
+{REL_EQ}      {tokenInit(&yylval, RELOP); yylval->int_val = REL_EQ; return RELOP;}
+{REL_NE}      {tokenInit(&yylval, RELOP); yylval->int_val = REL_NE; return RELOP;}
 {PLUS}        {tokenInit(&yylval, PLUS); return PLUS;}
 {MINUS}       {tokenInit(&yylval, MINUS); return MINUS;}
 {STAR}        {tokenInit(&yylval, STAR); return STAR;}

@@ -2,6 +2,15 @@
 #define MAXCH 10
 
 enum{
+  REL_G,
+  REL_L,
+  REL_GE,
+  REL_LE,
+  REL_EQ,
+  REL_NE,
+};
+
+enum{
   ExtDef_Val,
   ExtDef_Func,
   Specifier_Type,
@@ -199,7 +208,11 @@ enum{
 
   OP_GOTO, //GOTO Label#dst
   OP_IFG_GOTO, //IF t#src1 > t#src2 GOTO Label#dst
+  OP_IFL_GOTO,
+  OP_IFGE_GOTO,
+  OP_IFLE_GOTO,
   OP_IFEQ_GOTO,
+  OP_IFNE_GOTO,
 
   OP_ADD, //t#dst := t#src1 + t#src2
   OP_SUB,
