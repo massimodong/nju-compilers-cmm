@@ -442,8 +442,13 @@ static void irArgs(Tree *t){
   if(t->ch[2]){ //reverse order
     irArgs(t->ch[2]);
   }
-  irExp(t->ch[0], 0, 0);
-  code(OP_ARG, 0, t->ch[0]->label, 0);
+  if(t->ch[0]->exp_type->type == 0){
+    irExp(t->ch[0], 0, 0);
+    code(OP_ARG, 0, t->ch[0]->label, 0);
+  }else{
+    int addr_label = irExpGetAddr(t->ch[0]);
+    code(OP_ARG, 0, addr_label, 0);
+  }
 }
 
 void irInit(){
