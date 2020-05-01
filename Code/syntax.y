@@ -291,56 +291,56 @@ Dec: VarDec{
 
 Exp: Exp ASSIGNOP Exp{
   treeInit(&$$, Exp);
-  $$->int_val = Exp_Op2;
+  $$->int_val = Exp_ASSIGN;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp AND Exp{
   treeInit(&$$, Exp);
-  $$->int_val = Exp_Op2;
+  $$->int_val = Exp_AND;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp OR Exp{
   treeInit(&$$, Exp);
-  $$->int_val = Exp_Op2;
+  $$->int_val = Exp_OR;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp RELOP Exp{
   treeInit(&$$, Exp);
-  $$->int_val = Exp_Op2;
+  $$->int_val = Exp_RELOP;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp PLUS Exp{
   treeInit(&$$, Exp);
-  $$->int_val = Exp_Op2;
+  $$->int_val = Exp_PLUS;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp MINUS Exp{
   treeInit(&$$, Exp);
-  $$->int_val = Exp_Op2;
+  $$->int_val = Exp_MINUS;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp STAR Exp{
   treeInit(&$$, Exp);
-  $$->int_val = Exp_Op2;
+  $$->int_val = Exp_STAR;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
 }
   | Exp DIV Exp{
   treeInit(&$$, Exp);
-  $$->int_val = Exp_Op2;
+  $$->int_val = Exp_DIV;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
   $$->ch[2] = $3;
@@ -355,13 +355,13 @@ Exp: Exp ASSIGNOP Exp{
   | LP error RP{treeInit(&$$, Exp); yyerrok;}
   | MINUS Exp %prec NOT{
   treeInit(&$$, Exp);
-  $$->int_val = Exp_Op1;
+  $$->int_val = Exp_NEG;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
 }
   | NOT Exp{
   treeInit(&$$, Exp);
-  $$->int_val = Exp_Op1;
+  $$->int_val = Exp_NOT;
   $$->ch[0] = $1;
   $$->ch[1] = $2;
 }

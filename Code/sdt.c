@@ -22,6 +22,10 @@ IntListHash ListHashAppend(IntListHash, IntListHash);
 void ListHashInit(IntListHash *, int);
 int ListHashEq(IntListHash a, IntListHash b);
 
+void irInit();
+void irFinish();
+void irFunc(Tree *);
+
 Type *IntType, *FloatType;
 
 Type *makeArray(Type *t, int n){
@@ -258,9 +262,11 @@ void resolveProgram(Tree *t){
   trieQuery(symTabFunctions, "read")->defined = 1;
   trieQuery(symTabFunctions, "write")->defined = 1;
 
+  irInit();
   resolveExtDefList(t->ch[0]);
 
   checkUndefinedFunctions();
+  irFinish();
 }
 
 void resolveExtDefList(Tree *t){
@@ -298,6 +304,7 @@ void resolveExtDef(Tree *t){
           registerVariable(p->name, p->type, t->lineno);
         }
         resolveCompSt(t->ch[2]);
+        irFunc(t);
       }
       symTabStackPop();
       break;
@@ -679,14 +686,22 @@ void resolveExp_FunCall(Tree *t){
 void resolveExp(Tree *t){
   SymTabEntry *entry;
   switch(t->int_val){
-    case Exp_Op2:
+    case Exp_ASSIGN:
+    case Exp_AND:
+    case Exp_OR:
+    case Exp_RELOP:
+    case Exp_PLUS:
+    case Exp_MINUS:
+    case Exp_STAR:
+    case Exp_DIV:
       resolveExp_Op2(t);
       break;
     case Exp_Parentheses:
       resolveExp(t->ch[1]);
       t->exp_type = t->ch[1]->exp_type;
       break;
-    case Exp_Op1:
+    case Exp_NEG:
+    case Exp_NOT:
       resolveExp_Op1(t);
       break;
     case Exp_FunCall:

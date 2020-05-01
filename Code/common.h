@@ -13,9 +13,17 @@ enum{
   Stmt_Return,
   Stmt_If,
   Stmt_While,
-  Exp_Op2,
+  Exp_ASSIGN,
+  Exp_AND,
+  Exp_OR,
+  Exp_RELOP,
+  Exp_PLUS,
+  Exp_MINUS,
+  Exp_STAR,
+  Exp_DIV,
   Exp_Parentheses,
-  Exp_Op1,
+  Exp_NEG,
+  Exp_NOT,
   Exp_FunCall,
   Exp_QueryArray,
   Exp_QueryStruct,
@@ -151,6 +159,8 @@ typedef struct __Tree{
   Type *exp_type, *struct_type;
   const char *var_name;
   List *var_list, *arg_list;
+
+  int label;
 }Tree;
 
 typedef Tree *Treep;
@@ -158,8 +168,41 @@ typedef Tree *Treep;
 /********* IR ************/
 typedef struct{
   int op;
-  const char *dst, *src1, *src2;
+  union{
+    int dst;
+    const char *dst_var;
+  };
+  union{
+    int src1;
+    const char *src1_var;
+  };
+  union{
+    int src2;
+    const char *src2_var;
+  };
 }IRCode;
+
+enum{
+  OP_LABEL, //LABEL Label#src1
+
+  OP_FUNCTION, //FUNCTION src1_var
+  OP_PARAM, //PARAM src1_var
+  OP_FUNCALL, // t#dst := CALL src1_val
+  OP_ARG, //ARG t#src1
+
+  OP_READ, //READ t#dst
+  OP_WRITE, //WRITE t#src1
+
+  OP_LOAD, //t#dst := src1_var
+  OP_STORE, //dst_var := t#src1
+  OP_LOAD_IMM, //t#dst := constant(src1)
+
+  OP_ADD, //t#dst := t#src1 + t#src2
+  OP_SUB,
+  OP_MUL,
+  OP_DIV,
+  OP_RETURN, //RETURN t#src1
+};
 
 /********* vector *********/
 typedef struct{

@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "common.h"
 
+FILE *fir;
+
 void yyrestart (FILE *input_file);
 int yyparse (void);
 
@@ -11,6 +13,8 @@ int main(int argc, char** argv){
     perror(argv[1]);
     return 1;
   }
+
+  fir = stdout;
   yyrestart(f);
   yyparse();
   return 0;
