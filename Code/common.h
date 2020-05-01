@@ -1,3 +1,4 @@
+#include <stddef.h>
 #define MAXCH 10
 
 enum{
@@ -153,3 +154,15 @@ typedef struct __Tree{
 }Tree;
 
 typedef Tree *Treep;
+
+/********* IR ************/
+typedef struct{
+  int op;
+  const char *dst, *src1, *src2;
+}IRCode;
+
+/********* vector *********/
+typedef struct{
+  IRCode *data;
+  size_t size, len;
+}Vector;

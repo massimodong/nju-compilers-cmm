@@ -253,6 +253,11 @@ void resolveProgram(Tree *t){
   listAppend(&symTabStack, NULL);
   symTabStackDepth = 1;
 
+  registerFunction("read", IntType, newList(), 0);
+  registerFunction("write", IntType, makeParam("13107FF", IntType), 0);
+  trieQuery(symTabFunctions, "read")->defined = 1;
+  trieQuery(symTabFunctions, "write")->defined = 1;
+
   resolveExtDefList(t->ch[0]);
 
   checkUndefinedFunctions();
