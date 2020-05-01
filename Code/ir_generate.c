@@ -284,7 +284,7 @@ static void irExp(Tree *t, int true_label, int false_label){
       }
       break;
     case Exp_AND:
-      irAnd(t);
+      irAnd(t); //TODO: optimize: goto true or false label now
       break;
     case Exp_OR:
       irOr(t);
