@@ -197,6 +197,10 @@ enum{
   OP_STORE, //dst_var := t#src1
   OP_LOAD_IMM, //t#dst := constant(src1)
 
+  OP_GOTO, //GOTO Label#dst
+  OP_IFG_GOTO, //IF t#src1 > t#src2 GOTO Label#dst
+  OP_IFEQ_GOTO,
+
   OP_ADD, //t#dst := t#src1 + t#src2
   OP_SUB,
   OP_MUL,

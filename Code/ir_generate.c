@@ -43,6 +43,10 @@ static void code(int op, int dst, int src1, int src2){
 
 static void printIR(IRCode ir){
   switch(ir.op){
+    case OP_LABEL:
+      fprintf(fir, "LABEL Label%d :\n", ir.src1);
+      break;
+
     case OP_FUNCTION:
       fprintf(fir, "FUNCTION %s :\n", ir.src1_var);
       break;
@@ -55,12 +59,14 @@ static void printIR(IRCode ir){
     case OP_ARG:
       fprintf(fir, "ARG t%d\n", ir.src1);
       break;
+
     case OP_READ:
       fprintf(fir, "READ t%d\n", ir.dst);
       break;
     case OP_WRITE:
       fprintf(fir, "WRITE t%d\n", ir.src1);
       break;
+
     case OP_LOAD:
       fprintf(fir, "t%d := %s\n", ir.dst, ir.src1_var);
       break;
@@ -70,6 +76,17 @@ static void printIR(IRCode ir){
     case OP_LOAD_IMM:
       fprintf(fir, "t%d := #%d\n", ir.dst, ir.src1);
       break;
+
+    case OP_GOTO:
+      fprintf(fir, "GOTO Label%d\n", ir.dst);
+      break;
+    case OP_IFG_GOTO:
+      fprintf(fir, "IF t%d > t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
+      break;
+    case OP_IFEQ_GOTO:
+      fprintf(fir, "IF t%d == t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
+      break;
+
     case OP_ADD:
       fprintf(fir, "t%d := t%d + t%d\n", ir.dst, ir.src1, ir.src2);
       break;
@@ -94,7 +111,7 @@ static void irStmt(Tree *);
 static void irDefList(Tree *); //initialize variables
 static void irDef(Tree *);
 static void irDecList(Tree *);
-static void irExp(Tree *); //syn: label
+static void irExp(Tree *, int, int); //syn: label
 static void irArgs(Tree *);
 
 static void irCompSt(Tree *t){
@@ -112,10 +129,10 @@ static void irStmtList(Tree *t){
 static void irStmt(Tree *t){
   switch(t->int_val){
     case Stmt_Exp:
-      irExp(t->ch[0]);
+      irExp(t->ch[0], 0, 0);
       break;
     case Stmt_Return:
-      irExp(t->ch[1]);
+      irExp(t->ch[1], 0, 0);
       code(OP_RETURN, 0, t->ch[1]->label, 0);
       break;
     default:
@@ -138,6 +155,28 @@ static void irDecList(Tree *t){
   //TODO;
 }
 
+static void irAnd(Tree *t){
+  int false_label = ++label_cnt, end_label = ++label_cnt;
+  irExp(t->ch[0], 0, false_label);
+  irExp(t->ch[2], 0, false_label);
+  code(OP_LOAD_IMM, t->label, 1, 0);
+  code(OP_GOTO, end_label, 0, 0);
+  code(OP_LABEL, 0, false_label, 0);
+  code(OP_LOAD_IMM, t->label, 0, 0);
+  code(OP_LABEL, 0, end_label, 0);
+}
+
+static void irOr(Tree *t){
+  int true_label = ++label_cnt, end_label = ++label_cnt;
+  irExp(t->ch[0], true_label, 0);
+  irExp(t->ch[2], true_label, 0);
+  code(OP_LOAD_IMM, t->label, 0, 0);
+  code(OP_GOTO, end_label, 0, 0);
+  code(OP_LABEL, 0, true_label, 0);
+  code(OP_LOAD_IMM, t->label, 1, 0);
+  code(OP_LABEL, 0, end_label, 0);
+}
+
 static void irExp_FunCall(Tree *t){
   const char *funName = IDs[t->ch[0]->int_val];
 
@@ -146,7 +185,7 @@ static void irExp_FunCall(Tree *t){
     return;
   }else if(strcmp(funName, "write") == 0){
     assert(t->ch[2]);
-    irExp(t->ch[2]->ch[0]);
+    irExp(t->ch[2]->ch[0], 0, 0);
     code(OP_WRITE, 0, t->ch[2]->ch[0]->label, 0);
     return;
   }
@@ -158,11 +197,11 @@ static void irExp_FunCall(Tree *t){
   codes1(OP_FUNCALL, t->label, funName, 0);
 }
 
-static void irExp(Tree *t){
+static void irExp(Tree *t, int true_label, int false_label){
   t->label = ++label_cnt;
   switch(t->int_val){
     case Exp_ASSIGN:
-      irExp(t->ch[2]);
+      irExp(t->ch[2], 0, 0);
       switch(t->ch[0]->int_val){
         case Exp_Id:
           coded(OP_STORE, IDs[t->ch[0]->ch[0]->int_val], t->ch[2]->label, 0);
@@ -173,17 +212,17 @@ static void irExp(Tree *t){
       }
       break;
     case Exp_AND:
-      assert(0);
+      irAnd(t);
       break;
     case Exp_OR:
-      assert(0);
+      irOr(t);
       break;
     case Exp_RELOP:
       assert(0);
       break;
     case Exp_PLUS:
-      irExp(t->ch[0]);
-      irExp(t->ch[2]);
+      irExp(t->ch[0], 0, 0);
+      irExp(t->ch[2], 0, 0);
       code(OP_ADD, t->label, t->ch[0]->label, t->ch[2]->label);
       break;
     case Exp_FunCall:
@@ -199,13 +238,21 @@ static void irExp(Tree *t){
       printf("### %d\n", t->int_val);
       assert(0);
   }
+  if(true_label){
+    code(OP_LOAD_IMM, ++label_cnt, 0, 0);
+    code(OP_IFG_GOTO, true_label, t->label, label_cnt);
+  }
+  if(false_label){
+    code(OP_LOAD_IMM, ++label_cnt, 0, 0);
+    code(OP_IFEQ_GOTO, false_label, t->label, label_cnt);
+  }
 }
 
 static void irArgs(Tree *t){
   if(t->ch[2]){ //reverse order
     irArgs(t->ch[2]);
   }
-  irExp(t->ch[0]);
+  irExp(t->ch[0], 0, 0);
   code(OP_ARG, 0, t->ch[0]->label, 0);
 }
 
