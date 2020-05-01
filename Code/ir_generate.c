@@ -60,7 +60,7 @@ static void printIR(IRCode ir){
       fprintf(fir, "ARG t%d\n", ir.src1);
       break;
     case OP_DEC:
-      fprintf(fir, "DEC %s %d\n", ir.src1_var, ir.src2);
+      fprintf(fir, "DEC t%d %d\n", ir.src1, ir.src2);
       break;
 
     case OP_READ:
@@ -80,7 +80,7 @@ static void printIR(IRCode ir){
       fprintf(fir, "t%d := #%d\n", ir.dst, ir.src1);
       break;
     case OP_GETADDR:
-      fprintf(fir, "t%d := &%s\n", ir.dst, ir.src1_var);
+      fprintf(fir, "%s := &t%d\n", ir.dst_var, ir.src1);
       break;
     case OP_PUTADDR:
       fprintf(fir, "*t%d := t%d\n", ir.dst, ir.src1);
@@ -224,7 +224,8 @@ static void irDec(Tree *t){
   Type *type = t->ch[0]->exp_type;
 
   if(type->type == 2 || type->type == 3){
-    codes1(OP_DEC, 0, name, type->totsize);
+    code(OP_DEC, 0, ++label_cnt, type->totsize);
+    coded(OP_GETADDR, name, label_cnt, 0);
   }
 
   if(t->ch[2]){ //initialize
@@ -343,7 +344,7 @@ static int irExpGetAddr(Tree *t){
     code(OP_ADD, ++label_cnt, ol, offset_label);
     return label_cnt;
   }else if(t->int_val == Exp_Id){
-    codes1(OP_GETADDR, ++label_cnt, IDs[t->ch[0]->int_val], 0);
+    codes1(OP_LOAD, ++label_cnt, IDs[t->ch[0]->int_val], 0);
     return label_cnt;
   }else{
     assert(0);
