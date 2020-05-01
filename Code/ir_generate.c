@@ -306,6 +306,18 @@ static void irExp_FunCall(Tree *t){
   codes1(OP_FUNCALL, t->label, funName, 0);
 }
 
+static void irNot(Tree *t){
+  irExp(t->ch[1], 0, 0);
+  int zero_label = ++label_cnt, false_label = ++label_cnt, end_label = ++label_cnt;
+  code(OP_LOAD_IMM, zero_label, 0, 0);
+  code(OP_IFEQ_GOTO, false_label, t->ch[1]->label, zero_label);
+  code(OP_LOAD_IMM, t->label, 0, 0);
+  code(OP_GOTO, end_label, 0, 0);
+  code(OP_LABEL, 0, false_label, 0);
+  code(OP_LOAD_IMM, t->label, 1, 0);
+  code(OP_LABEL, 0, end_label, 0);
+}
+
 static int irExpGetAddr(Tree *t){
   if(t->int_val == Exp_QueryArray){
     int ol = irExpGetAddr(t->ch[0]);
@@ -383,6 +395,18 @@ static void irExp(Tree *t, int true_label, int false_label){
       irExp(t->ch[0], 0, 0);
       irExp(t->ch[2], 0, 0);
       code(OP_DIV, t->label, t->ch[0]->label, t->ch[2]->label);
+      break;
+    case Exp_Parentheses:
+      irExp(t->ch[1], 0, 0);
+      t->label = t->ch[1]->label;
+      break;
+    case Exp_NEG:
+      irExp(t->ch[1], 0, 0);
+      code(OP_LOAD_IMM, ++label_cnt, 0, 0);
+      code(OP_SUB, t->label, label_cnt, t->ch[1]->label);
+      break;
+    case Exp_NOT:
+      irNot(t);
       break;
     case Exp_FunCall:
       irExp_FunCall(t);
