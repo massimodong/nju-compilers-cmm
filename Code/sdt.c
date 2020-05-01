@@ -237,7 +237,7 @@ void resolveStmt(Tree *);
 void resolveDefList_fromCompSt(Tree *);
 void resolveDef_fromCompSt(Tree *);
 void resolveDecList_fromCompSt(Tree *); //inh: type
-void resolveDec_fromCompSt(Tree *); //inh: type; registers variables
+void resolveDec_fromCompSt(Tree *); //inh: type; registers variables-e
 
 void resolveDefList_fromStruct(Tree *); //inh: struct_type (to be filled)
 void resolveDef_fromStruct(Tree *); //inh: struct_type (to be filled)
@@ -576,6 +576,7 @@ void resolveDec_fromStruct(Tree *t){
     entry->name = se->name;
     entry->depth = 0;
     entry->type = se->type;
+    entry->structEntry = se;
     trieInsert(&t->struct_type->map, se->name, entry);
   }
 }

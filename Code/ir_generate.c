@@ -59,6 +59,9 @@ static void printIR(IRCode ir){
     case OP_ARG:
       fprintf(fir, "ARG t%d\n", ir.src1);
       break;
+    case OP_DEC:
+      fprintf(fir, "DEC %s %d\n", ir.src1_var, ir.src2);
+      break;
 
     case OP_READ:
       fprintf(fir, "READ t%d\n", ir.dst);
@@ -75,6 +78,15 @@ static void printIR(IRCode ir){
       break;
     case OP_LOAD_IMM:
       fprintf(fir, "t%d := #%d\n", ir.dst, ir.src1);
+      break;
+    case OP_GETADDR:
+      fprintf(fir, "t%d := &%s\n", ir.dst, ir.src1_var);
+      break;
+    case OP_PUTADDR:
+      fprintf(fir, "*t%d := t%d\n", ir.dst, ir.src1);
+      break;
+    case OP_GETFROMADDR:
+      fprintf(fir, "t%d := *t%d\n", ir.dst, ir.src1);
       break;
 
     case OP_GOTO:
@@ -133,6 +145,7 @@ static void irStmt(Tree *);
 static void irDefList(Tree *); //initialize variables
 static void irDef(Tree *);
 static void irDecList(Tree *);
+static void irDec(Tree *);
 static void irExp(Tree *, int, int); //syn: label
 static void irArgs(Tree *);
 
@@ -202,7 +215,22 @@ static void irDef(Tree *t){
 }
 
 static void irDecList(Tree *t){
-  //TODO;
+  irDec(t->ch[0]);
+  if(t->ch[2]) irDecList(t->ch[2]);
+}
+
+static void irDec(Tree *t){
+  const char *name = t->ch[0]->var_name;
+  Type *type = t->ch[0]->exp_type;
+
+  if(type->type == 2 || type->type == 3){
+    codes1(OP_DEC, 0, name, type->totsize);
+  }
+
+  if(t->ch[2]){ //initialize
+    irExp(t->ch[2], 0, 0);
+    coded(OP_STORE, name, t->ch[2]->label, 0);
+  }
 }
 
 static void irAnd(Tree *t){
@@ -278,7 +306,40 @@ static void irExp_FunCall(Tree *t){
   codes1(OP_FUNCALL, t->label, funName, 0);
 }
 
+static int irExpGetAddr(Tree *t){
+  if(t->int_val == Exp_QueryArray){
+    int ol = irExpGetAddr(t->ch[0]);
+
+    int pace_label = ++label_cnt;
+    Type *type = t->ch[0]->exp_type;
+    code(OP_LOAD_IMM, pace_label, type->next->totsize, 0);
+
+    int offset_label = ++label_cnt;
+    irExp(t->ch[2], 0, 0);
+    code(OP_MUL, offset_label, pace_label, t->ch[2]->label);
+
+    code(OP_ADD, ++label_cnt, ol, offset_label);
+    return label_cnt;
+  }else if(t->int_val == Exp_QueryStruct){
+    int ol = irExpGetAddr(t->ch[0]);
+    const char *name = IDs[t->ch[2]->int_val];
+    Type *type = t->ch[0]->exp_type;
+    SymTabEntry *entry = trieQuery(type->map, name);
+
+    int offset_label = ++label_cnt;
+    code(OP_LOAD_IMM, offset_label, entry->structEntry->offset, 0);
+    code(OP_ADD, ++label_cnt, ol, offset_label);
+    return label_cnt;
+  }else if(t->int_val == Exp_Id){
+    codes1(OP_GETADDR, ++label_cnt, IDs[t->ch[0]->int_val], 0);
+    return label_cnt;
+  }else{
+    assert(0);
+  }
+}
+
 static void irExp(Tree *t, int true_label, int false_label){
+  int addr_label;
   t->label = ++label_cnt;
   switch(t->int_val){
     case Exp_ASSIGN:
@@ -288,7 +349,8 @@ static void irExp(Tree *t, int true_label, int false_label){
           coded(OP_STORE, IDs[t->ch[0]->ch[0]->int_val], t->ch[2]->label, 0);
           break;
         default:
-          assert(0);
+          addr_label = irExpGetAddr(t->ch[0]);
+          code(OP_PUTADDR, addr_label, t->ch[2]->label, 0);
           break;
       }
       t->label = t->ch[2]->label;
@@ -324,6 +386,14 @@ static void irExp(Tree *t, int true_label, int false_label){
       break;
     case Exp_FunCall:
       irExp_FunCall(t);
+      break;
+    case Exp_QueryArray:
+      //assert(typeEq(t->type, IntType)); //TODO: should not assert
+      addr_label = irExpGetAddr(t);
+      code(OP_GETFROMADDR, t->label, addr_label, 0);
+      break;
+    case Exp_QueryStruct:
+      assert(0);
       break;
     case Exp_Id:
       codes1(OP_LOAD, t->label, IDs[t->ch[0]->int_val], 0);

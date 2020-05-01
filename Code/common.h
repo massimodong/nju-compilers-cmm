@@ -140,10 +140,11 @@ typedef struct __SymTableEmtry{
   const char *name;
   int depth;
   union{
-    struct{
+    struct{ // for variables and structEntrys
       Type *type;
+      StructEntry *structEntry;
     };
-    struct{
+    struct{ // for functions
       Type *returnType;
       List *paramList;
       int defined, lineno;
@@ -201,6 +202,7 @@ enum{
   OP_PARAM, //PARAM src1_var
   OP_FUNCALL, // t#dst := CALL src1_val
   OP_ARG, //ARG t#src1
+  OP_DEC, //DEC src1_var src2
 
   OP_READ, //READ t#dst
   OP_WRITE, //WRITE t#src1
@@ -208,6 +210,9 @@ enum{
   OP_LOAD, //t#dst := src1_var
   OP_STORE, //dst_var := t#src1
   OP_LOAD_IMM, //t#dst := constant(src1)
+  OP_GETADDR, //t#dst := &src1_var
+  OP_PUTADDR, //*t#dst := t#src1
+  OP_GETFROMADDR, //t#dst := *t#src1
 
   OP_GOTO, //GOTO Label#dst
   OP_IFG_GOTO, //IF t#src1 > t#src2 GOTO Label#dst
