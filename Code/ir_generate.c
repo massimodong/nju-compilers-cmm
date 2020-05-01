@@ -388,12 +388,10 @@ static void irExp(Tree *t, int true_label, int false_label){
       irExp_FunCall(t);
       break;
     case Exp_QueryArray:
+    case Exp_QueryStruct:
       //assert(typeEq(t->type, IntType)); //TODO: should not assert
       addr_label = irExpGetAddr(t);
       code(OP_GETFROMADDR, t->label, addr_label, 0);
-      break;
-    case Exp_QueryStruct:
-      assert(0);
       break;
     case Exp_Id:
       codes1(OP_LOAD, t->label, IDs[t->ch[0]->int_val], 0);
