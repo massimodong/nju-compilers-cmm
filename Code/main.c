@@ -9,13 +9,20 @@ int yyparse (void);
 int main(int argc, char** argv){
   if (argc <= 1) return 1;
   FILE* f = fopen(argv[1], "r");
+
+  if(argc > 2){
+    fir = fopen(argv[2], "w");
+  }else{
+    fir = stdout;
+  }
+
   if (!f){
     perror(argv[1]);
     return 1;
   }
 
-  fir = stdout;
   yyrestart(f);
   yyparse();
+
   return 0;
 }
