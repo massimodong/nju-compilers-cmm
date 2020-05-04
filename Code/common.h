@@ -208,8 +208,7 @@ enum{
   OP_READ, //READ t#dst
   OP_WRITE, //WRITE t#src1
 
-  OP_LOAD, //t#dst := t#src1
-  OP_STORE, //t#dst := t#src1
+  OP_ASSIGN, //t#dst := t#src1
   OP_LOAD_IMM, //t#dst := constant(src1)
   OP_GETADDR, //t#dst := &t#src1
   OP_PUTADDR, //*t#dst := t#src1

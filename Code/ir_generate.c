@@ -77,10 +77,7 @@ static void printIR(IRCode ir){
       fprintf(fir, "WRITE t%d\n", ir.src1);
       break;
 
-    case OP_LOAD:
-      fprintf(fir, "t%d := t%d\n", ir.dst, ir.src1);
-      break;
-    case OP_STORE:
+    case OP_ASSIGN:
       fprintf(fir, "t%d := t%d\n", ir.dst, ir.src1);
       break;
     case OP_LOAD_IMM:
@@ -237,7 +234,7 @@ static void irDec(Tree *t){
 
   if(t->ch[2]){ //initialize
     irExp(t->ch[2], 0, 0);
-    code(OP_STORE, get_var_label(name), t->ch[2]->label, 0);
+    code(OP_ASSIGN, get_var_label(name), t->ch[2]->label, 0);
   }
 }
 
@@ -304,6 +301,7 @@ static void irExp_FunCall(Tree *t){
     assert(t->ch[2]);
     irExp(t->ch[2]->ch[0], 0, 0);
     code(OP_WRITE, 0, t->ch[2]->ch[0]->label, 0);
+    code(OP_LOAD_IMM, t->label, 0, 0);
     return;
   }
 
@@ -351,7 +349,7 @@ static int irExpGetAddr(Tree *t){
     code(OP_ADD, ++label_cnt, ol, offset_label);
     return label_cnt;
   }else if(t->int_val == Exp_Id){
-    code(OP_LOAD, ++label_cnt, get_var_label(IDs[t->ch[0]->int_val]), 0);
+    code(OP_ASSIGN, ++label_cnt, get_var_label(IDs[t->ch[0]->int_val]), 0);
     return label_cnt;
   }else{
     assert(0);
@@ -366,7 +364,7 @@ static void irExp(Tree *t, int true_label, int false_label){
       irExp(t->ch[2], 0, 0);
       switch(t->ch[0]->int_val){
         case Exp_Id:
-          code(OP_STORE, get_var_label(IDs[t->ch[0]->ch[0]->int_val]), t->ch[2]->label, 0);
+          code(OP_ASSIGN, get_var_label(IDs[t->ch[0]->ch[0]->int_val]), t->ch[2]->label, 0);
           break;
         default:
           addr_label = irExpGetAddr(t->ch[0]);
@@ -426,7 +424,7 @@ static void irExp(Tree *t, int true_label, int false_label){
       code(OP_GETFROMADDR, t->label, addr_label, 0);
       break;
     case Exp_Id:
-      code(OP_LOAD, t->label, get_var_label(IDs[t->ch[0]->int_val]), 0);
+      code(OP_ASSIGN, t->label, get_var_label(IDs[t->ch[0]->int_val]), 0);
       break;
     case Exp_Constant:
       code(OP_LOAD_IMM, t->label, t->ch[0]->int_val, 0);
