@@ -143,6 +143,7 @@ typedef struct __SymTableEmtry{
     struct{ // for variables and structEntrys
       Type *type;
       StructEntry *structEntry;
+      int label;
     };
     struct{ // for functions
       Type *returnType;
@@ -199,7 +200,7 @@ enum{
   OP_LABEL, //LABEL Label#src1
 
   OP_FUNCTION, //FUNCTION src1_var
-  OP_PARAM, //PARAM src1_var
+  OP_PARAM, //PARAM t#src1
   OP_FUNCALL, // t#dst := CALL src1_val
   OP_ARG, //ARG t#src1
   OP_DEC, //DEC t#src1 src2
@@ -207,10 +208,10 @@ enum{
   OP_READ, //READ t#dst
   OP_WRITE, //WRITE t#src1
 
-  OP_LOAD, //t#dst := src1_var
-  OP_STORE, //dst_var := t#src1
+  OP_LOAD, //t#dst := t#src1
+  OP_STORE, //t#dst := t#src1
   OP_LOAD_IMM, //t#dst := constant(src1)
-  OP_GETADDR, //dst_var := &t#src1
+  OP_GETADDR, //t#dst := &t#src1
   OP_PUTADDR, //*t#dst := t#src1
   OP_GETFROMADDR, //t#dst := *t#src1
 

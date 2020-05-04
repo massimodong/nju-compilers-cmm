@@ -104,17 +104,24 @@ void printType(Type *t){
 Trie *symTabStructs;
 List symTabStack = (List){NULL, NULL};
 int symTabStackDepth = 0;
+
+// should not implement this in lab3
 void symTabStackPush(){
+  /*
   listAppend(&symTabStack, symTabStack.rear->val);
   ++symTabStackDepth;
+  */
 }
 void symTabStackPop(){
+  /*
   --symTabStackDepth;
   listPopRear(&symTabStack);
+  */
 }
 
 /* register a variable, return whether success
  */
+extern int label_cnt;
 void registerVariable(const char *name, Type *type, int lineno){
 #ifdef PRINTREGISTERS
   printf("register variable %s of type: ", name);
@@ -138,6 +145,7 @@ void registerVariable(const char *name, Type *type, int lineno){
   entry->name = name;
   entry->depth = symTabStackDepth;
   entry->type = type;
+  entry->label = ++label_cnt;
 
   trieInsert(&symTabStack.rear->val, name, entry);
 }
