@@ -291,47 +291,50 @@ static void irOr(Tree *t, int tl, int fl){
     code(OP_LOAD_IMM, t->label, 0 , 0);
     code(OP_LABEL, 0, el, 0);
   }
-  /*
-  int true_label = ++label_cnt, end_label = ++label_cnt;
-  irExp(t->ch[0], true_label, 0);
-  irExp(t->ch[2], true_label, 0);
-  code(OP_LOAD_IMM, t->label, 0, 0);
-  code(OP_GOTO, end_label, 0, 0);
-  code(OP_LABEL, 0, true_label, 0);
-  code(OP_LOAD_IMM, t->label, 1, 0);
-  code(OP_LABEL, 0, end_label, 0);
-  */
 }
 
-static void irRelop(Tree *t){
-  int true_label = ++label_cnt, end_label = ++label_cnt;
+static void irRelop(Tree *t, int tl, int fl){
+  int generate_labels = 0;
+  if(tl || fl){
+    assert(tl && fl);
+  }else{
+    tl = ++label_cnt;
+    fl = ++label_cnt;
+    generate_labels = 1;
+  }
   irExp(t->ch[0], 0, 0);
   irExp(t->ch[2], 0, 0);
   switch(t->ch[1]->int_val){
     case REL_G:
-      code(OP_IFG_GOTO, true_label, t->ch[0]->label, t->ch[2]->label);
+      code(OP_IFG_GOTO, tl, t->ch[0]->label, t->ch[2]->label);
       break;
     case REL_L:
-      code(OP_IFL_GOTO, true_label, t->ch[0]->label, t->ch[2]->label);
+      code(OP_IFL_GOTO, tl, t->ch[0]->label, t->ch[2]->label);
       break;
     case REL_GE:
-      code(OP_IFGE_GOTO, true_label, t->ch[0]->label, t->ch[2]->label);
+      code(OP_IFGE_GOTO, tl, t->ch[0]->label, t->ch[2]->label);
       break;
     case REL_LE:
-      code(OP_IFLE_GOTO, true_label, t->ch[0]->label, t->ch[2]->label);
+      code(OP_IFLE_GOTO, tl, t->ch[0]->label, t->ch[2]->label);
       break;
     case REL_EQ:
-      code(OP_IFEQ_GOTO, true_label, t->ch[0]->label, t->ch[2]->label);
+      code(OP_IFEQ_GOTO, tl, t->ch[0]->label, t->ch[2]->label);
       break;
     case REL_NE:
-      code(OP_IFNE_GOTO, true_label, t->ch[0]->label, t->ch[2]->label);
+      code(OP_IFNE_GOTO, tl, t->ch[0]->label, t->ch[2]->label);
       break;
   }
-  code(OP_LOAD_IMM, t->label, 0, 0);
-  code(OP_GOTO, end_label, 0, 0);
-  code(OP_LABEL, 0, true_label, 0);
-  code(OP_LOAD_IMM, t->label, 1, 0);
-  code(OP_LABEL, 0, end_label, 0);
+  code(OP_GOTO, fl, 0, 0);
+
+  if(generate_labels){
+    int el = ++label_cnt;
+    code(OP_LABEL, 0, fl, 0);
+    code(OP_LOAD_IMM, t->label, 0, 0);
+    code(OP_GOTO, el, 0, 0);
+    code(OP_LABEL, 0, tl, 0);
+    code(OP_LOAD_IMM, t->label, 1, 0);
+    code(OP_LABEL, 0, el, 0);
+  }
 }
 
 static void irExp_FunCall(Tree *t){
@@ -457,8 +460,8 @@ static void irExp(Tree *t, int true_label, int false_label){
       irOr(t, true_label, false_label);
       return; //Attention: We RETURN Here
     case Exp_RELOP:
-      irRelop(t);
-      break;
+      irRelop(t, true_label, false_label);
+      return; //Attention: We RETURN Here
     case Exp_PLUS:
       irExp(t->ch[0], 0, 0);
       irExp(t->ch[2], 0, 0);
