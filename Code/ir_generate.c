@@ -181,24 +181,27 @@ static void irStmt(Tree *t){
       break;
     case Stmt_If:
       if(t->ch[6]){
-        int false_label = ++label_cnt, end_label = ++label_cnt;
-        irExp(t->ch[2], 0, false_label);
+        int true_label = ++label_cnt, false_label = ++label_cnt, end_label = ++label_cnt;
+        irExp(t->ch[2], true_label, false_label);
+        code(OP_LABEL, 0, true_label, 0);
         irStmt(t->ch[4]);
         code(OP_GOTO, end_label, 0, 0);
         code(OP_LABEL, 0, false_label, 0);
         irStmt(t->ch[6]);
         code(OP_LABEL, 0, end_label, 0);
       }else{
-        int end_label = ++label_cnt;
-        irExp(t->ch[2], 0, end_label);
+        int true_label = ++label_cnt, end_label = ++label_cnt;
+        irExp(t->ch[2], true_label, end_label);
+        code(OP_LABEL, 0, true_label, 0);
         irStmt(t->ch[4]);
         code(OP_LABEL, 0, end_label, 0);
       }
       break;
     case Stmt_While: {
-      int start_label = ++label_cnt, end_label = ++label_cnt;
+      int start_label = ++label_cnt, true_label = ++label_cnt, end_label = ++label_cnt;
       code(OP_LABEL, 0, start_label, 0);
-      irExp(t->ch[2], 0, end_label);
+      irExp(t->ch[2], true_label, end_label);
+      code(OP_LABEL, 0, true_label, 0);
       irStmt(t->ch[4]);
       code(OP_GOTO, start_label, 0, 0);
       code(OP_LABEL, 0, end_label, 0);
@@ -240,18 +243,55 @@ static void irDec(Tree *t){
   }
 }
 
-static void irAnd(Tree *t){
-  int false_label = ++label_cnt, end_label = ++label_cnt;
-  irExp(t->ch[0], 0, false_label);
-  irExp(t->ch[2], 0, false_label);
-  code(OP_LOAD_IMM, t->label, 1, 0);
-  code(OP_GOTO, end_label, 0, 0);
-  code(OP_LABEL, 0, false_label, 0);
-  code(OP_LOAD_IMM, t->label, 0, 0);
-  code(OP_LABEL, 0, end_label, 0);
+static void irAnd(Tree *t,int tl, int fl){
+  int generate_labels = 0;
+  if(tl || fl){
+    assert(tl && fl);
+  }else{
+    tl = ++label_cnt;
+    fl = ++label_cnt;
+    generate_labels = 1;
+  }
+  int ml = ++label_cnt;
+  irExp(t->ch[0], ml, fl);
+  code(OP_LABEL, 0, ml, 0);
+  irExp(t->ch[2], tl, fl);
+
+  if(generate_labels){
+    int el = ++label_cnt;
+    code(OP_LABEL, 0, tl, 0);
+    code(OP_LOAD_IMM, t->label, 1, 0);
+    code(OP_GOTO, el, 0, 0);
+    code(OP_LABEL, 0, fl, 0);
+    code(OP_LOAD_IMM, t->label, 0 , 0);
+    code(OP_LABEL, 0, el, 0);
+  }
 }
 
-static void irOr(Tree *t){
+static void irOr(Tree *t, int tl, int fl){
+  int generate_labels = 0;
+  if(tl || fl){
+    assert(tl && fl);
+  }else{
+    tl = ++label_cnt;
+    fl = ++label_cnt;
+    generate_labels = 1;
+  }
+  int ml = ++label_cnt;
+  irExp(t->ch[0], tl, ml);
+  code(OP_LABEL, 0, ml, 0);
+  irExp(t->ch[2], tl, fl);
+
+  if(generate_labels){
+    int el = ++label_cnt;
+    code(OP_LABEL, 0, tl, 0);
+    code(OP_LOAD_IMM, t->label, 1, 0);
+    code(OP_GOTO, el, 0, 0);
+    code(OP_LABEL, 0, fl, 0);
+    code(OP_LOAD_IMM, t->label, 0 , 0);
+    code(OP_LABEL, 0, el, 0);
+  }
+  /*
   int true_label = ++label_cnt, end_label = ++label_cnt;
   irExp(t->ch[0], true_label, 0);
   irExp(t->ch[2], true_label, 0);
@@ -260,6 +300,7 @@ static void irOr(Tree *t){
   code(OP_LABEL, 0, true_label, 0);
   code(OP_LOAD_IMM, t->label, 1, 0);
   code(OP_LABEL, 0, end_label, 0);
+  */
 }
 
 static void irRelop(Tree *t){
@@ -410,11 +451,11 @@ static void irExp(Tree *t, int true_label, int false_label){
       irExpAssign(t);
       break;
     case Exp_AND:
-      irAnd(t); //TODO: optimize: goto true or false label now
-      break;
+      irAnd(t, true_label, false_label);
+      return; //Attention: We RETURN Here
     case Exp_OR:
-      irOr(t);
-      break;
+      irOr(t, true_label, false_label);
+      return; //Attention: We RETURN Here
     case Exp_RELOP:
       irRelop(t);
       break;
