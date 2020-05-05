@@ -471,7 +471,7 @@ static void irExp(Tree *t, int true_label, int false_label){
   }
   if(true_label){
     code(OP_LOAD_IMM, ++label_cnt, 0, 0);
-    code(OP_IFG_GOTO, true_label, t->label, label_cnt);
+    code(OP_IFNE_GOTO, true_label, t->label, label_cnt);
   }
   if(false_label){
     code(OP_LOAD_IMM, ++label_cnt, 0, 0);
