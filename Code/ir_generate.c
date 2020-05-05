@@ -8,6 +8,7 @@ int min(int a, int b){return a < b ? a : b;}
 Vector *vector_new();
 void vec_pb(Vector *, IRCode);
 SymTabEntry *trieQuery(Trie *, const char *);
+void irOptimize(Vector *);
 
 extern Trie *symTabFunctions;
 extern FILE *fir;
@@ -546,6 +547,7 @@ void irInit(){
 }
 
 void irFinish(){
+  irOptimize(ir_code);
   printIRCode();
 }
 
