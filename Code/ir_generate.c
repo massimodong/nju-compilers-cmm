@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <string.h>
 
+int min(int a, int b){return a < b ? a : b;}
+
 Vector *vector_new();
 void vec_pb(Vector *, IRCode);
 SymTabEntry *trieQuery(Trie *, const char *);
@@ -351,9 +353,53 @@ static int irExpGetAddr(Tree *t){
   }else if(t->int_val == Exp_Id){
     code(OP_ASSIGN, ++label_cnt, get_var_label(IDs[t->ch[0]->int_val]), 0);
     return label_cnt;
+  }else if(t->int_val == Exp_Parentheses){
+    return irExpGetAddr(t->ch[1]);
+  }else if(t->int_val == Exp_ASSIGN){ // resolve Assign Exp, which returns label of l_addr
+    irExp(t, 0, 0);
+    code(OP_ASSIGN, ++label_cnt, t->label, 0);
+    return label_cnt;
   }else{
     assert(0);
   }
+}
+
+static void irExpAssign(Tree *t){
+  if(t->ch[0]->int_val == Exp_Id && t->ch[0]->exp_type->type == 0){
+    irExp(t->ch[2], 0, 0);
+    code(OP_ASSIGN, get_var_label(IDs[t->ch[0]->ch[0]->int_val]), t->ch[2]->label, 0);
+    t->label = get_var_label(IDs[t->ch[0]->ch[0]->int_val]);
+  }else if(t->ch[0]->exp_type->type == 0){
+    irExp(t->ch[2], 0, 0);
+    int addr_label = irExpGetAddr(t->ch[0]);
+    code(OP_PUTADDR, addr_label, t->ch[2]->label, 0);
+    t->label = t->ch[2]->label;
+  }else{
+    int l_addr_label = irExpGetAddr(t->ch[0]),
+        r_addr_label = irExpGetAddr(t->ch[2]);
+
+    int size = min(t->ch[0]->exp_type->totsize, t->ch[2]->exp_type->totsize);
+    int t_label = ++label_cnt, four_label = ++label_cnt;
+    code(OP_ASSIGN, t->label, l_addr_label, 0);
+    code(OP_LOAD_IMM, four_label, 4, 0);
+    for(int i=0;i<size;i+=4){
+      code(OP_GETFROMADDR, t_label, r_addr_label, 0);
+      code(OP_PUTADDR, l_addr_label, t_label, 0);
+      code(OP_ADD, l_addr_label, l_addr_label, four_label);
+      code(OP_ADD, r_addr_label, r_addr_label, four_label);
+    }
+  }
+  /*
+  switch(t->ch[0]->int_val){
+    case Exp_Id:
+      code(OP_ASSIGN, get_var_label(IDs[t->ch[0]->ch[0]->int_val]), t->ch[2]->label, 0);
+      break;
+    default:
+      addr_label = irExpGetAddr(t->ch[0]);
+      code(OP_PUTADDR, addr_label, t->ch[2]->label, 0);
+      break;
+  }
+  */
 }
 
 static void irExp(Tree *t, int true_label, int false_label){
@@ -361,17 +407,7 @@ static void irExp(Tree *t, int true_label, int false_label){
   t->label = ++label_cnt;
   switch(t->int_val){
     case Exp_ASSIGN:
-      irExp(t->ch[2], 0, 0);
-      switch(t->ch[0]->int_val){
-        case Exp_Id:
-          code(OP_ASSIGN, get_var_label(IDs[t->ch[0]->ch[0]->int_val]), t->ch[2]->label, 0);
-          break;
-        default:
-          addr_label = irExpGetAddr(t->ch[0]);
-          code(OP_PUTADDR, addr_label, t->ch[2]->label, 0);
-          break;
-      }
-      t->label = t->ch[2]->label;
+      irExpAssign(t);
       break;
     case Exp_AND:
       irAnd(t); //TODO: optimize: goto true or false label now
