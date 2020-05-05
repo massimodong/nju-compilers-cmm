@@ -423,14 +423,19 @@ static void irExpAssign(Tree *t){
         r_addr_label = irExpGetAddr(t->ch[2]);
 
     int size = min(t->ch[0]->exp_type->totsize, t->ch[2]->exp_type->totsize);
-    int t_label = ++label_cnt, four_label = ++label_cnt;
+    int four_label = ++label_cnt;
     code(OP_ASSIGN, t->label, l_addr_label, 0);
     code(OP_LOAD_IMM, four_label, 4, 0);
     for(int i=0;i<size;i+=4){
+      int t_label = ++label_cnt;
       code(OP_GETFROMADDR, t_label, r_addr_label, 0);
       code(OP_PUTADDR, l_addr_label, t_label, 0);
-      code(OP_ADD, l_addr_label, l_addr_label, four_label);
-      code(OP_ADD, r_addr_label, r_addr_label, four_label);
+
+      int nl = ++label_cnt, nr = ++label_cnt;
+      code(OP_ADD, nl, l_addr_label, four_label);
+      code(OP_ADD, nr, r_addr_label, four_label);
+      l_addr_label = nl;
+      r_addr_label = nr;
     }
   }
   /*
