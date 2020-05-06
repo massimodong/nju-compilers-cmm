@@ -582,16 +582,23 @@ static void irExp(Tree *t, int true_label, int false_label, int out){
 }
 
 static void irArgs(Tree *t){
+  int addr_label;
+  if(t->ch[0]->exp_type->type == 0){
+    irExp(t->ch[0], 0, 0, 0);
+  }else{
+    addr_label = irExpGetAddr(t->ch[0]);
+  }
+
   if(t->ch[2]){ //reverse order
     irArgs(t->ch[2]);
   }
+
   if(t->ch[0]->exp_type->type == 0){
-    irExp(t->ch[0], 0, 0, 0);
     code(OP_ARG, 0, t->ch[0]->label, 0);
   }else{
-    int addr_label = irExpGetAddr(t->ch[0]);
     code(OP_ARG, 0, addr_label, 0);
   }
+
 }
 
 void irInit(){
