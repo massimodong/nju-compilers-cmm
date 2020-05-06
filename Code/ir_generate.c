@@ -539,7 +539,7 @@ static void irExp(Tree *t, int true_label, int false_label, int out){
     case Exp_Parentheses:
       irExp(t->ch[1], true_label, false_label, out);
       t->label = t->ch[1]->label;
-      break;
+      return; //Attention: We RETURN Here
     case Exp_NEG:
       if(out == -1){
         irExp(t->ch[1], 0, 0, -1);

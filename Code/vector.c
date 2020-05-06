@@ -13,6 +13,7 @@ Vector *vector_new(){
 
 void vector_free(Vector *vec){
   assert(vec);
+  if(vec->data) free(vec->data);
   free(vec);
 }
 
