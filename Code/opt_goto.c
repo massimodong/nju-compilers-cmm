@@ -89,4 +89,6 @@ void opt_goto(Vector *vec){
       vec_pb(vec, nv->data[i]);
     }
   }
+
+  free(label_used);
 }
