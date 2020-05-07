@@ -23,6 +23,7 @@ static void codes1(int op, int dst, const char *src1_var, int src2){
   irc.dst = dst;
   irc.src1_var = src1_var;
   irc.src2 = src2;
+  irc.cnst1 = irc.cnst2 = 0;
   vec_pb(ir_code, irc);
 }
 
@@ -32,16 +33,29 @@ static void coded(int op, const char *dst_var, int src1, int src2){
   irc.dst_var = dst_var;
   irc.src1 = src1;
   irc.src2 = src2;
+  irc.cnst1 = irc.cnst2 = 0;
   vec_pb(ir_code, irc);
 }
 
 static void code(int op, int dst, int src1, int src2){
-  IRCode irc;
-  irc.op = op;
-  irc.dst = dst;
-  irc.src1 = src1;
-  irc.src2 = src2;
-  vec_pb(ir_code, irc);
+  if(op == OP_LOAD_IMM){
+    IRCode irc;
+    irc.op = OP_ASSIGN;
+    irc.dst = dst;
+    irc.src1 = src1;
+    irc.src2 = src2;
+    irc.cnst1 = 1;
+    irc.cnst2 = 0;
+    vec_pb(ir_code, irc);
+  }else{
+    IRCode irc;
+    irc.op = op;
+    irc.dst = dst;
+    irc.src1 = src1;
+    irc.src2 = src2;
+    irc.cnst1 = irc.cnst2 = 0;
+    vec_pb(ir_code, irc);
+  }
 }
 
 extern List symTabStack;
@@ -51,93 +65,141 @@ static int get_var_label(const char *var_name){
   return entry->label;
 }
 
+void src1s(IRCode ir){
+  if(ir.cnst1){
+    fprintf(fir, "#%d", ir.src1);
+  }else{
+    fprintf(fir, "t%d", ir.src1);
+  }
+}
+
+void src2s(IRCode ir){
+  if(ir.cnst2){
+    fprintf(fir, "#%d", ir.src2);
+  }else{
+    fprintf(fir, "t%d", ir.src2);
+  }
+}
+
+const char *relop2str(int op){
+  switch(op){
+    case OP_IFG_GOTO:
+      return ">";
+    case OP_IFL_GOTO:
+      return "<";
+    case OP_IFGE_GOTO:
+      return ">=";
+    case OP_IFLE_GOTO:
+      return "<=";
+    case OP_IFEQ_GOTO:
+      return "==";
+    case OP_IFNE_GOTO:
+      return "!=";
+    default:
+      assert(0);
+  }
+}
+
+const char *art2str(int op){
+  switch(op){
+    case OP_ADD:
+      return "+";
+    case OP_SUB:
+      return "-";
+    case OP_MUL:
+      return "*";
+    case OP_DIV:
+      return "/";
+    default:
+      assert(0);
+  }
+}
+
 static void printIR(IRCode ir){
   switch(ir.op){
     case OP_LABEL:
-      fprintf(fir, "LABEL Label%d :\n", ir.src1);
+      fprintf(fir, "LABEL Label%d :", ir.src1);
       break;
 
     case OP_FUNCTION:
-      fprintf(fir, "FUNCTION %s :\n", ir.src1_var);
+      fprintf(fir, "FUNCTION %s :", ir.src1_var);
       break;
     case OP_PARAM:
-      fprintf(fir, "PARAM t%d\n", ir.src1);
+      fprintf(fir, "PARAM ");
+      src1s(ir);
       break;
     case OP_FUNCALL:
-      fprintf(fir, "t%d := CALL %s\n", ir.dst, ir.src1_var);
+      fprintf(fir, "t%d := CALL %s", ir.dst, ir.src1_var);
       break;
     case OP_ARG:
-      fprintf(fir, "ARG t%d\n", ir.src1);
+      fprintf(fir, "ARG ");
+      src1s(ir);
       break;
     case OP_DEC:
-      fprintf(fir, "DEC t%d %d\n", ir.src1, ir.src2);
+      fprintf(fir, "DEC t%d %d", ir.src1, ir.src2);
       break;
 
     case OP_READ:
-      fprintf(fir, "READ t%d\n", ir.dst);
+      fprintf(fir, "READ t%d", ir.dst);
       break;
     case OP_WRITE:
-      fprintf(fir, "WRITE t%d\n", ir.src1);
+      fprintf(fir, "WRITE ");
+      src1s(ir);
       break;
 
     case OP_ASSIGN:
-      fprintf(fir, "t%d := t%d\n", ir.dst, ir.src1);
+      fprintf(fir, "t%d := ", ir.dst);
+      src1s(ir);
       break;
     case OP_LOAD_IMM:
-      fprintf(fir, "t%d := #%d\n", ir.dst, ir.src1);
+      assert(0);
       break;
     case OP_GETADDR:
-      fprintf(fir, "t%d := &t%d\n", ir.dst, ir.src1);
+      fprintf(fir, "t%d := &t%d", ir.dst, ir.src1);
       break;
     case OP_PUTADDR:
-      fprintf(fir, "*t%d := t%d\n", ir.dst, ir.src1);
+      fprintf(fir, "*t%d := ", ir.dst);
+      src1s(ir);
       break;
     case OP_GETFROMADDR:
-      fprintf(fir, "t%d := *t%d\n", ir.dst, ir.src1);
+      fprintf(fir, "t%d := *t%d", ir.dst, ir.src1);
       break;
 
     case OP_GOTO:
-      fprintf(fir, "GOTO Label%d\n", ir.dst);
+      fprintf(fir, "GOTO Label%d", ir.dst);
       break;
     case OP_IFG_GOTO:
-      fprintf(fir, "IF t%d > t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
-      break;
     case OP_IFL_GOTO:
-      fprintf(fir, "IF t%d < t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
-      break;
     case OP_IFGE_GOTO:
-      fprintf(fir, "IF t%d >= t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
-      break;
     case OP_IFLE_GOTO:
-      fprintf(fir, "IF t%d <= t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
-      break;
     case OP_IFEQ_GOTO:
-      fprintf(fir, "IF t%d == t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
-      break;
     case OP_IFNE_GOTO:
-      fprintf(fir, "IF t%d != t%d GOTO Label%d\n", ir.src1, ir.src2, ir.dst);
+      fprintf(fir, "IF ");
+      src1s(ir);
+      fprintf(fir, " %s ", relop2str(ir.op));
+      src2s(ir);
+      fprintf(fir, " GOTO Label%d", ir.dst);
       break;
 
     case OP_ADD:
-      fprintf(fir, "t%d := t%d + t%d\n", ir.dst, ir.src1, ir.src2);
-      break;
     case OP_SUB:
-      fprintf(fir, "t%d := t%d - t%d\n", ir.dst, ir.src1, ir.src2);
-      break;
     case OP_MUL:
-      fprintf(fir, "t%d := t%d * t%d\n", ir.dst, ir.src1, ir.src2);
-      break;
     case OP_DIV:
-      fprintf(fir, "t%d := t%d / t%d\n", ir.dst, ir.src1, ir.src2);
+      fprintf(fir, "t%d := ", ir.dst);
+      src1s(ir);
+      fprintf(fir, " %s ", art2str(ir.op));
+      src2s(ir);
       break;
 
     case OP_RETURN:
-      fprintf(fir, "RETURN t%d\n", ir.src1);
+      fprintf(fir, "RETURN ");
+      src1s(ir);
       break;
     default:
       fprintf(stderr, "not implemented!\n");
       assert(0);
   }
+  fprintf(fir, "\n");
 }
 
 static void printIRCode(){
@@ -614,7 +676,7 @@ void irFunc(Tree *t){
   assert(t);
   const char *funName = t->ch[1]->var_name;
   SymTabEntry *e = trieQuery(symTabFunctions, funName);
-  codes1(OP_FUNCTION, 0, funName, 0);
+  codes1(OP_FUNCTION, 0, funName, label_cnt);
   for(ListNode *n = e->paramList->head;n;n = n->next){
     Param *p = n->val;
     code(OP_PARAM, 0, get_var_label(p->name), 0);

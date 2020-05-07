@@ -190,10 +190,12 @@ typedef struct{
     int src1;
     const char *src1_var;
   };
+  int cnst1;
   union{
     int src2;
     const char *src2_var;
   };
+  int cnst2;
 }IRCode;
 
 enum{

@@ -55,6 +55,8 @@ void opt_goto(Vector *vec){
         ir.dst = vec->data[i+1].dst;
         ir.src1 = vec->data[i].src1;
         ir.src2 = vec->data[i].src2;
+        ir.cnst1 = vec->data[i].cnst1;
+        ir.cnst2 = vec->data[i].cnst2;
         vec_pb(nv, ir);
 
         /*
