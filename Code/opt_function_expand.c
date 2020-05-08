@@ -39,7 +39,6 @@ static IRCode new_labeling(IRCode irc){
   switch(irc.op){
     //src1:
     case OP_LABEL:
-    case OP_PARAM:
     case OP_ARG:
     case OP_DEC:
     case OP_WRITE:
@@ -49,6 +48,7 @@ static IRCode new_labeling(IRCode irc){
 
     //dst:
     case OP_FUNCALL:
+    case OP_PARAM:
     case OP_READ:
     case OP_GOTO:
       irc.dst = new_label(irc.dst);
@@ -143,7 +143,7 @@ void opt_function_expand(Vector *vec){
           IRCode *pp = n->val;
           listPopRear(&argStack);
           irp->op = OP_ASSIGN;
-          irp->dst = new_label(pp->src1);
+          irp->dst = new_label(pp->dst);
         }
         int end_label = ++label_cnt;
         for(int j=e->lineno;j<nv->len;++j){

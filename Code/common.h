@@ -202,7 +202,7 @@ enum{
   OP_LABEL, //LABEL Label#src1
 
   OP_FUNCTION, //FUNCTION src1_var
-  OP_PARAM, //PARAM t#src1
+  OP_PARAM, //PARAM t#dst
   OP_FUNCALL, // t#dst := CALL src1_val
   OP_ARG, //ARG t#src1
   OP_DEC, //DEC t#src1 src2

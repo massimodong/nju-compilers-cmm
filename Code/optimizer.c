@@ -20,5 +20,5 @@ void irOptimize(Vector *vec){
     opt_goto(vec);
   }
   */
-  //opt_variable_propagate(vec);
+  opt_variable_propagate(vec);
 }

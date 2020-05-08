@@ -126,8 +126,7 @@ static void printIR(IRCode ir){
       fprintf(fir, "FUNCTION %s :", ir.src1_var);
       break;
     case OP_PARAM:
-      fprintf(fir, "PARAM ");
-      src1s(ir);
+      fprintf(fir, "PARAM t%d", ir.dst);
       break;
     case OP_FUNCALL:
       fprintf(fir, "t%d := CALL %s", ir.dst, ir.src1_var);
@@ -686,7 +685,7 @@ void irFunc(Tree *t){
   codes1(OP_FUNCTION, 0, funName, label_cnt);
   for(ListNode *n = e->paramList->head;n;n = n->next){
     Param *p = n->val;
-    code(OP_PARAM, 0, get_var_label(p->name), 0);
+    code(OP_PARAM, get_var_label(p->name), 0, 0);
   }
 
   assert(t->ch[2]);

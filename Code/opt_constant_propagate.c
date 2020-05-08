@@ -40,10 +40,10 @@ static int exp_type(IRCode ir){
     case OP_GETADDR:
     case OP_GETFROMADDR:
     case OP_READ:
+    case OP_PARAM:
       return C_D1;
 
     case OP_DEC:
-    case OP_PARAM:
       return C_S1;
 
     case OP_PUTADDR:
@@ -134,6 +134,7 @@ static int is_variable(int l){
 int has_dst(IRCode irc){
   switch(irc.op){
     case OP_FUNCALL:
+    case OP_PARAM:
     case OP_READ:
     case OP_ASSIGN:
     case OP_GETADDR:

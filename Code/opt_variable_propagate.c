@@ -22,7 +22,6 @@ static IRCode new_labeling(IRCode irc){
   switch(irc.op){
     //src1:
     //case OP_LABEL:
-    case OP_PARAM:
     case OP_ARG:
     //case OP_DEC:
     case OP_WRITE:
@@ -33,6 +32,7 @@ static IRCode new_labeling(IRCode irc){
     /*
     //dst:
     case OP_FUNCALL:
+    case OP_PARAM:
     case OP_READ:
     case OP_GOTO:
       irc.dst = new_label(irc.dst);
