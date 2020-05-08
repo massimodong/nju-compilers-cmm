@@ -9,11 +9,11 @@ void opt_nonreachable(Vector *vec){
 
   int r = 1;
   for(int i=0;i<vec->len;++i){
-    if(vec->data[i].op == OP_LABEL){
+    if(vec->data[i].op == OP_LABEL || vec->data[i].op == OP_FUNCTION){
       r = 1;
     }
     if(r) vec_pb(nv, vec->data[i]);
-    if(vec->data[i].op == OP_GOTO){
+    if(vec->data[i].op == OP_GOTO || vec->data[i].op == OP_RETURN){
       r = 0;
     }
   }
