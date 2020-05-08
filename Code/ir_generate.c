@@ -442,11 +442,17 @@ static void irExp_FunCall(Tree *t, int out){
     return;
   }
 
-  if(t->ch[2]){
-    irArgs(t->ch[2]);
+  if(out != -1){
+    if(t->ch[2]){
+      irArgs(t->ch[2]);
+    }
+    codes1(OP_FUNCALL, t->label, funName, 0);
+  }else{
+    if(t->ch[2]){
+      irArgs(t->ch[2]);
+    }
+    codes1(OP_FUNCALL, ++label_cnt, funName, 0);
   }
-
-  codes1(OP_FUNCALL, t->label, funName, 0);
 }
 
 static void irNot(Tree *t, int tl, int fl, int out){

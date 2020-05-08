@@ -8,13 +8,12 @@ void opt_goto(Vector *vec);
 
 void irOptimize(Vector *vec){
   opt_goto(vec);
-  for(int i=0;i<7;++i){
+  for(int i=0;i<1;++i){
     opt_constant_propagate(vec);
     opt_goto(vec);
     opt_nonreachable(vec);
     opt_goto(vec);
-    //opt_function_expand(vec);
+    opt_function_expand(vec);
     opt_goto(vec);
   }
-  //opt_function_expand(vec);
 }
