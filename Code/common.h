@@ -213,7 +213,7 @@ enum{
   OP_ASSIGN, //t#dst := t#src1
   OP_LOAD_IMM, //t#dst := constant(src1)
   OP_GETADDR, //t#dst := &t#src1
-  OP_PUTADDR, //*t#dst := t#src1
+  OP_PUTADDR, //*t#src2 := t#src1
   OP_GETFROMADDR, //t#dst := *t#src1
 
   OP_GOTO, //GOTO Label#dst

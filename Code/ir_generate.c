@@ -158,7 +158,7 @@ static void printIR(IRCode ir){
       fprintf(fir, "t%d := &t%d", ir.dst, ir.src1);
       break;
     case OP_PUTADDR:
-      fprintf(fir, "*t%d := ", ir.dst);
+      fprintf(fir, "*t%d := ", ir.src2);
       src1s(ir);
       break;
     case OP_GETFROMADDR:
@@ -529,7 +529,7 @@ static void irExpAssign(Tree *t, int out){
   }else if(t->ch[0]->exp_type->type == 0){
     irExp(t->ch[2], 0, 0, 0);
     int addr_label = irExpGetAddr(t->ch[0]);
-    code(OP_PUTADDR, addr_label, t->ch[2]->label, 0);
+    code(OP_PUTADDR, 0, t->ch[2]->label, addr_label);
     t->label = t->ch[2]->label;
     if(out > 0) code(OP_ASSIGN, out, t->label, 0);
   }else{
@@ -545,7 +545,7 @@ static void irExpAssign(Tree *t, int out){
     for(int i=0;i<size;i+=4){
       int t_label = ++label_cnt;
       code(OP_GETFROMADDR, t_label, r_addr_label, 0);
-      code(OP_PUTADDR, l_addr_label, t_label, 0);
+      code(OP_PUTADDR, 0, t_label, l_addr_label);
 
       int nl = ++label_cnt, nr = ++label_cnt;
       code(OP_ADD, nl, l_addr_label, four_label);

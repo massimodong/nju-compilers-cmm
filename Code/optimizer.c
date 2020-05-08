@@ -9,7 +9,7 @@ void opt_simplify_each_code(Vector *vec);
 
 void irOptimize(Vector *vec){
   opt_goto(vec);
-  for(int i=0;i<9;++i){
+  for(int i=0;i<5;++i){
     opt_variable_propagate(vec);
     opt_goto(vec);
     opt_constant_propagate(vec);
