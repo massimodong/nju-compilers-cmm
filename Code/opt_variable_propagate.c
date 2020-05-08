@@ -83,7 +83,7 @@ void opt_variable_propagate(Vector *vec){
 
   for(int i=0;i<vec->len;++i){
     if(vec->data[i].op == OP_ASSIGN){
-      if(is_variable(vec->data[i].dst) || vec->data[i].cnst1){
+      if(is_variable(vec->data[i].dst) || vec->data[i].cnst1 || is_variable(vec->data[i].src1)){
         vec_pb(nv, new_labeling(vec->data[i]));
       }else{
         cc[vec->data[i].dst] = vec->data[i].src1;
