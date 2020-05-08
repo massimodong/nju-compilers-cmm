@@ -44,7 +44,7 @@ static IRCode new_labeling(IRCode irc){
     case OP_GETADDR:
     case OP_PUTADDR:
     case OP_GETFROMADDR:
-      //irc.dst = new_label(irc.dst);
+      irc.dst = new_label(irc.dst);
       if(irc.cnst1 == 0) irc.src1 = new_label(irc.src1);
       break;
 
