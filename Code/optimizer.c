@@ -7,8 +7,11 @@ void opt_function_expand(Vector *vec);
 void opt_goto(Vector *vec);
 
 void irOptimize(Vector *vec){
+  /*
   opt_goto(vec);
-  for(int i=0;i<1;++i){
+  for(int i=0;i<5;++i){
+    //opt_variable_propagate(vec);
+    opt_goto(vec);
     opt_constant_propagate(vec);
     opt_goto(vec);
     opt_nonreachable(vec);
@@ -16,4 +19,6 @@ void irOptimize(Vector *vec){
     opt_function_expand(vec);
     opt_goto(vec);
   }
+  */
+  //opt_variable_propagate(vec);
 }
