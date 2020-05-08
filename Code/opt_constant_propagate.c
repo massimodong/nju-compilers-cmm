@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+extern int *iv;
 extern int label_cnt;
 Vector *vector_new();
 void vector_free(Vector *);
@@ -128,7 +129,7 @@ static int cond_goto_is_true(IRCode ir){
 }
 
 static int is_variable(int l){
-  return l <= cur_fun_th || oc[l] >= 2;
+  return iv[l] || oc[l] >= 2;
 }
 
 void opt_constant_propagate(Vector *vec){
@@ -138,6 +139,7 @@ void opt_constant_propagate(Vector *vec){
   Vector *nv = vector_new();
   for(int i=1;i<=label_cnt;++i) ic[i] = 1;
   for(int i=1;i<=label_cnt;++i) cv[i] = 0;
+  for(int i=1;i<=label_cnt;++i) oc[i] = 0;
   cur_fun_th = 0;
 
   for(int i=0;i<vec->len;++i){

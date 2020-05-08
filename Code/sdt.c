@@ -10,6 +10,7 @@ void sdd_error_lineno(int n, const char *msg, int lineno){
   printf("Error type %d at Line %d: %s.\n", n, lineno, msg);
 }
 
+extern List *variables;
 extern char **IDs;
 int trieInsert(Trie **, const char *, SymTabEntry *);
 SymTabEntry *trieQuery(Trie *, const char *);
@@ -148,6 +149,8 @@ void registerVariable(const char *name, Type *type, int lineno){
   entry->label = ++label_cnt;
 
   trieInsert(&symTabStack.rear->val, name, entry);
+
+  listAppend(variables, entry);
 }
 
 void registerStruct(const char *name, Type *type, int lineno){
@@ -263,6 +266,8 @@ void resolveProgram(Tree *t){
   ListHashInit(&IntType->hash, 0);
   ListHashInit(&FloatType->hash, 1);
   IntType->totsize = FloatType->totsize = 4;
+
+  variables = newList();
 
   listAppend(&symTabStack, NULL);
   symTabStackDepth = 1;
