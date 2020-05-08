@@ -13,7 +13,8 @@ void irOptimize(Vector *vec){
     opt_goto(vec);
     opt_nonreachable(vec);
     opt_goto(vec);
-    opt_function_expand(vec);
+    //opt_function_expand(vec);
     opt_goto(vec);
   }
+  //opt_function_expand(vec);
 }

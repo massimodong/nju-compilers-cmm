@@ -18,9 +18,6 @@ extern char **IDs;
 static Vector *ir_code;
 int label_cnt = 0;
 
-int *iv = NULL;
-List *variables;
-
 static void codes1(int op, int dst, const char *src1_var, int src2){
   IRCode irc;
   irc.op = op;
@@ -672,12 +669,6 @@ void irInit(){
 }
 
 void irFinish(){
-  iv = malloc(sizeof(int) * (label_cnt + 233));
-  for(int i=0;i<=label_cnt;++i) iv[i] = 0;
-  for(ListNode *n=variables->head;n;n=n->next){
-    SymTabEntry *entry = n->val;
-    iv[entry->label] = 1;
-  }
   irOptimize(ir_code);
   printIRCode();
 }

@@ -1,0 +1,17 @@
+FUNCTION main :
+t15 := CALL four
+ARG t15
+t14 := CALL succ
+t17 := #14
+GOTO Label21
+LABEL Label21 :
+t13 := CALL three
+ARG t13
+t12 := CALL succ
+t18 := #12
+GOTO Label22
+LABEL Label22 :
+t16 := t17 * t18
+WRITE t16
+t20 := #0
+RETURN t20

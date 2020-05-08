@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-extern int *iv;
 extern int label_cnt;
 Vector *vector_new();
 void vector_free(Vector *);
@@ -129,7 +128,24 @@ static int cond_goto_is_true(IRCode ir){
 }
 
 static int is_variable(int l){
-  return iv[l] || oc[l] >= 2;
+  return oc[l] >= 2;
+}
+
+int has_dst(IRCode irc){
+  switch(irc.op){
+    case OP_FUNCALL:
+    case OP_READ:
+    case OP_ASSIGN:
+    case OP_GETADDR:
+    case OP_GETFROMADDR:
+    case OP_ADD:
+    case OP_SUB:
+    case OP_MUL:
+    case OP_DIV:
+      return 1;
+    default:
+      return 0;
+  }
 }
 
 void opt_constant_propagate(Vector *vec){
@@ -143,18 +159,7 @@ void opt_constant_propagate(Vector *vec){
   cur_fun_th = 0;
 
   for(int i=0;i<vec->len;++i){
-    switch(vec->data[i].op){
-      case OP_FUNCALL:
-      case OP_READ:
-      case OP_ASSIGN:
-      case OP_GETADDR:
-      case OP_GETFROMADDR:
-      case OP_ADD:
-      case OP_SUB:
-      case OP_MUL:
-      case OP_DIV:
-        ++oc[vec->data[i].dst];
-    }
+    if(has_dst(vec->data[i])) ++oc[vec->data[i].dst];
   }
 
   for(int i=0;i<vec->len;++i){
