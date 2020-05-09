@@ -7,6 +7,7 @@ void opt_function_expand(Vector *vec);
 void opt_goto(Vector *vec);
 void opt_simplify_each_code(Vector *vec);
 void opt_array2variable(Vector *vec);
+void opt_block(Vector *vec);
 
 void irOptimize(Vector *vec){
   opt_goto(vec);
@@ -22,5 +23,6 @@ void irOptimize(Vector *vec){
     opt_simplify_each_code(vec);
     opt_array2variable(vec);
   }
+  opt_block(vec);
   //opt_constant_propagate(vec);
 }

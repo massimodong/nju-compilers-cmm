@@ -262,6 +262,7 @@ void opt_constant_propagate(Vector *vec){
         }else{
           vec_pb(nv, np);
         }
+        enter_new_block();
         break;
 
       default:
