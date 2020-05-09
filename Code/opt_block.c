@@ -1,5 +1,6 @@
 #include "common.h"
 #include <stdlib.h>
+#include <assert.h>
 
 extern int label_cnt;
 Vector *vector_new();
@@ -186,7 +187,7 @@ static void opt_work(Vector *vec){
     for(int i=block_end[b];i>=block_start[b];--i){
       IRCode irc = vec->data[i];
       if(!resolve_easy(irc)){
-        if(irc.op == OP_READ){
+        if(irc.op == OP_READ || irc.op == OP_FUNCALL){
           active[irc.dst] = 0;
         }else if(has_dst(irc) && !active[irc.dst]){
           rem[i] = 0;
@@ -203,6 +204,7 @@ static void opt_work(Vector *vec){
     for(int i=1;i<=label_cnt;++i) if(active[i]){
       for(int j=0;j<go_cnt;++j){
         block_list[go[j]][block_list_len[go[j]]++] = i;
+        assert(block_list_len[go[j]] < (vec->len + 233));
       }
       active[i] = 0;
     }
