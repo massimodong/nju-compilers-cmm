@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdint.h>
 
 extern int label_cnt;
 Vector *vector_new();
@@ -134,8 +135,8 @@ void opt_function_expand(Vector *vec){
       vec_pb(nv, vec->data[i]);
       curFun->lineno = nv->len;
     }else if(vec->data[i].op == OP_ARG){
+      listAppend(&argStack, (void *)nv->len);
       vec_pb(nv, vec->data[i]);
-      listAppend(&argStack, nv->data + nv->len - 1);
     }else if(vec->data[i].op == OP_FUNCALL){
       SymTabEntry *e = trieQuery(Fn, vec->data[i].src1_var);
       assert(e);
@@ -145,11 +146,11 @@ void opt_function_expand(Vector *vec){
       }else{
         start_new_label();
         for(ListNode *n = e->paramList->head;n;n=n->next){
-          IRCode *irp = argStack.rear->val;
+          int lno = (uintptr_t)argStack.rear->val;
           IRCode *pp = n->val;
           listPopRear(&argStack);
-          irp->op = OP_ASSIGN;
-          irp->dst = new_label(pp->dst);
+          nv->data[lno].op = OP_ASSIGN;
+          nv->data[lno].dst = new_label(pp->dst);
         }
         int end_label = ++label_cnt;
         for(int j=e->lineno;j<nv->len;++j){
