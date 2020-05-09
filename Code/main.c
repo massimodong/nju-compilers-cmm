@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include "common.h"
 
-const char* __asan_default_options() { return "detect_leaks=0"; } // Ignore memory leaks when using AddressSanitizer
+//Ignore memory leaks when using AddressSanitizer, from https://stackoverflow.com/questions/51060801/how-to-suppress-leaksanitizer-report-when-running-under-fsanitize-address
+const char* __asan_default_options() { return "detect_leaks=0"; }
 
 FILE *fir;
 
