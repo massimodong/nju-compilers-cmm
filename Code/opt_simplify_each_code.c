@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern int label_cnt;
+
 void opt_simplify_each_code(Vector *vec){
   for(int i=0;i<vec->len;++i){
     if(vec->data[i].op == OP_ADD){
@@ -41,6 +43,12 @@ void opt_simplify_each_code(Vector *vec){
         vec->data[i].cnst1 = 1;
         vec->data[i].src1 = 0;
         vec->data[i].cnst2 = vec->data[i].src2 = 0;
+      }
+    }else if(vec->data[i].op == OP_ASSIGN){
+      if(vec->data[i].cnst1 == 0 && vec->data[i].dst == vec->data[i].src1){ //dummy code
+        vec->data[i].dst = ++label_cnt;
+        vec->data[i].cnst1 = 1;
+        vec->data[i].src1 = 0;
       }
     }
   }
