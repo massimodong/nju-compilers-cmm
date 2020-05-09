@@ -23,8 +23,10 @@ static int is_cond_goto(IRCode ir){
 
 void opt_goto(Vector *vec){
   Vector *nv = vector_new();
-  int *label_used = malloc(sizeof(int) * (label_cnt + 233));
-  for(int i=1;i<=label_cnt;++i) label_used[i] = 0;
+  int *label_used = malloc(sizeof(int) * (label_cnt + 233)),
+      *cslabel = malloc(sizeof(int) * (label_cnt + 233));
+
+  for(int i=1;i<=label_cnt;++i) label_used[i] = cslabel[i] = 0;
   for(int i=0;i<vec->len;++i){
     if(i+2 < vec->len){
       if(is_cond_goto(vec->data[i]) && vec->data[i+1].op == OP_GOTO && vec->data[i+2].op == OP_LABEL && vec->data[i].dst == vec->data[i+2].src1){
@@ -80,6 +82,17 @@ void opt_goto(Vector *vec){
     vec_pb(nv, vec->data[i]);
   }
 
+  for(int i=0;i<nv->len;++i) if(nv->data[i].op == OP_LABEL){
+    cslabel[nv->data[i].src1] = nv->data[i].src1;
+    if(i && nv->data[i-1].op == OP_LABEL){
+      cslabel[nv->data[i].src1] = cslabel[nv->data[i-1].src1];
+    }
+  }
+
+  for(int i=0;i<nv->len;++i) if(is_cond_goto(nv->data[i]) || nv->data[i].op == OP_GOTO){
+    nv->data[i].dst = cslabel[nv->data[i].dst];
+  }
+
   for(int i=0;i<nv->len;++i) if(is_cond_goto(nv->data[i]) || nv->data[i].op == OP_GOTO){
     label_used[nv->data[i].dst] = 1;
   }
@@ -92,5 +105,6 @@ void opt_goto(Vector *vec){
     }
   }
 
+  free(cslabel);
   free(label_used);
 }
