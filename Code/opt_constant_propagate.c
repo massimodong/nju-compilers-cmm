@@ -62,7 +62,6 @@ static int exp_type(IRCode ir){
   }
 }
 static int *ic, *cv, *oc;
-static int cur_fun_th = -1;
 
 static int is_constant(IRCode irc){
   switch(irc.op){
@@ -157,7 +156,6 @@ void opt_constant_propagate(Vector *vec){
   for(int i=1;i<=label_cnt;++i) ic[i] = 1;
   for(int i=1;i<=label_cnt;++i) cv[i] = 0;
   for(int i=1;i<=label_cnt;++i) oc[i] = 0;
-  cur_fun_th = 0;
 
   for(int i=0;i<vec->len;++i){
     if(has_dst(vec->data[i])) ++oc[vec->data[i].dst];
@@ -171,10 +169,6 @@ void opt_constant_propagate(Vector *vec){
         break;
       case C_FUNCTION:
         vec_pb(nv, vec->data[i]);
-        for(int j=cur_fun_th + 1;j<=vec->data[i].src2;++j){
-          ic[j] = 0;
-        }
-        cur_fun_th = vec->data[i].src2;
         break;
       case C_ASSIGN:
         np = vec->data[i];
@@ -274,8 +268,8 @@ void opt_constant_propagate(Vector *vec){
     }
   }
 
-  vec->len = nv->len;
-  for(int i=0;i<nv->len;++i) vec->data[i] = nv->data[i];
+  vec->len = 0;
+  for(int i=0;i<nv->len;++i) vec_pb(vec, nv->data[i]);
 
   free(ic);
   free(cv);

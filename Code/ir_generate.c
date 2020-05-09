@@ -682,7 +682,7 @@ void irFunc(Tree *t){
   assert(t);
   const char *funName = t->ch[1]->var_name;
   SymTabEntry *e = trieQuery(symTabFunctions, funName);
-  codes1(OP_FUNCTION, 0, funName, label_cnt);
+  codes1(OP_FUNCTION, 0, funName, 0);
   for(ListNode *n = e->paramList->head;n;n = n->next){
     Param *p = n->val;
     code(OP_PARAM, get_var_label(p->name), 0, 0);
