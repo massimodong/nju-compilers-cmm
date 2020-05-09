@@ -9,7 +9,6 @@ void vec_pb(Vector *, IRCode);
 
 enum{
   C_GENERAL,
-  C_FUNCTION,
   C_ASSIGN,
   C_ARITHMETIC,
   C_D1,
@@ -22,11 +21,8 @@ static int exp_type(IRCode ir){
   switch(ir.op){
     case OP_LABEL:
     case OP_GOTO:
-
-      return C_GENERAL;
-
     case OP_FUNCTION:
-      return C_FUNCTION;
+      return C_GENERAL;
 
     case OP_ASSIGN:
       return C_ASSIGN;
@@ -61,7 +57,7 @@ static int exp_type(IRCode ir){
       return C_COND_GOTO;
   }
 }
-static int *ic, *cv, *oc;
+static int *ic, *cv, *oc, *vl, vlen;
 
 static int is_constant(IRCode irc){
   switch(irc.op){
@@ -148,10 +144,16 @@ int has_dst(IRCode irc){
   }
 }
 
+static int enter_new_block(){
+  for(int i=0;i<vlen;++i) ic[vl[i]] = 0;
+}
+
 void opt_constant_propagate(Vector *vec){
   ic = malloc(sizeof(int) * (label_cnt + 233));
   cv = malloc(sizeof(int) * (label_cnt + 233));
   oc = malloc(sizeof(int) * (label_cnt + 233));
+  vl = malloc(sizeof(int) * (label_cnt + 233));
+  vlen = 0;
   Vector *nv = vector_new();
   for(int i=1;i<=label_cnt;++i) ic[i] = 1;
   for(int i=1;i<=label_cnt;++i) cv[i] = 0;
@@ -161,14 +163,14 @@ void opt_constant_propagate(Vector *vec){
     if(has_dst(vec->data[i])) ++oc[vec->data[i].dst];
   }
 
+  for(int i=1;i<=label_cnt;++i) if(is_variable(i)) vl[vlen++] = i;
+
   for(int i=0;i<vec->len;++i){
     IRCode np;
     switch(exp_type(vec->data[i])){
       case C_GENERAL:
         vec_pb(nv, vec->data[i]);
-        break;
-      case C_FUNCTION:
-        vec_pb(nv, vec->data[i]);
+        enter_new_block();
         break;
       case C_ASSIGN:
         np = vec->data[i];
@@ -176,19 +178,16 @@ void opt_constant_propagate(Vector *vec){
           np.cnst1 = 1;
           np.src1 = cv[np.src1];
         }
-        if(is_variable(np.dst)){
+        if(np.cnst1){
+          ic[np.dst] = 1;
+          cv[np.dst] = np.src1;
+          if(is_variable(np.dst)){
+            vec_pb(nv, np);
+          }
+        }else{
           vec_pb(nv, np);
           ic[np.dst] = 0;
-        }else{
-          if(np.cnst1){
-            ic[np.dst] = 1;
-            cv[np.dst] = np.src1;
-          }else{
-            vec_pb(nv, np);
-            ic[np.dst] = 0;
-          }
         }
-
         break;
       case C_ARITHMETIC:
         np = vec->data[i];
@@ -209,7 +208,6 @@ void opt_constant_propagate(Vector *vec){
             np.cnst1 = 1;
             np.src2 = np.cnst2 = 0;
             vec_pb(nv, np);
-            ic[np.dst] = 0;
           }
         }else{
           vec_pb(nv, np);
@@ -239,6 +237,9 @@ void opt_constant_propagate(Vector *vec){
           np.src1 = cv[np.src1];
         }
         vec_pb(nv, np);
+        if(np.op == OP_RETURN){
+          enter_new_block();
+        }
         break;
       case C_COND_GOTO:
         np = vec->data[i];
@@ -274,5 +275,6 @@ void opt_constant_propagate(Vector *vec){
   free(ic);
   free(cv);
   free(oc);
+  free(vl);
   vector_free(nv);
 }
