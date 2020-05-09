@@ -431,7 +431,8 @@ static void irExp_FunCall(Tree *t, int out){
   const char *funName = IDs[t->ch[0]->int_val];
 
   if(strcmp(funName, "read") == 0){
-    code(OP_READ, t->label, 0, 0);
+    if(out != -1) code(OP_READ, t->label, 0, 0);
+    else code(OP_READ, ++label_cnt, 0, 0);
     return;
   }else if(strcmp(funName, "write") == 0){
     assert(t->ch[2]);
@@ -573,6 +574,8 @@ static void irExp(Tree *t, int true_label, int false_label, int out){
     t->label = ++label_cnt;
   }else if(out > 0){
     t->label = out;
+  }else{
+    t->label = -0x130BC99;
   }
   switch(t->int_val){
     case Exp_ASSIGN:
@@ -627,7 +630,7 @@ static void irExp(Tree *t, int true_label, int false_label, int out){
     case Exp_QueryStruct:
       //assert(typeEq(t->type, IntType)); //TODO: should not assert
       addr_label = irExpGetAddr(t);
-      code(OP_GETFROMADDR, t->label, addr_label, 0);
+      if(out != -1) code(OP_GETFROMADDR, t->label, addr_label, 0);
       break;
     case Exp_Id:
       t->label = get_var_label(IDs[t->ch[0]->int_val]);
@@ -635,7 +638,7 @@ static void irExp(Tree *t, int true_label, int false_label, int out){
       //code(OP_ASSIGN, t->label, get_var_label(IDs[t->ch[0]->int_val]), 0);
       break;
     case Exp_Constant:
-      code(OP_LOAD_IMM, t->label, t->ch[0]->int_val, 0);
+      if(out != -1) code(OP_LOAD_IMM, t->label, t->ch[0]->int_val, 0);
       break;
     default:
       printf("### %d\n", t->int_val);

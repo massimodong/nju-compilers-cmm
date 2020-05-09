@@ -22,5 +22,5 @@ void irOptimize(Vector *vec){
     opt_simplify_each_code(vec);
     opt_array2variable(vec);
   }
-  opt_constant_propagate(vec);
+  //opt_constant_propagate(vec);
 }

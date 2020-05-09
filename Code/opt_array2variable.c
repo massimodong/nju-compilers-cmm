@@ -79,6 +79,7 @@ void opt_array2variable(Vector *vec){
     }
   }
 
+  int old_label_cnt = label_cnt;
 
   for(int i=0;i<vec->len;++i){
     IRCode irc = vec->data[i];
@@ -123,7 +124,7 @@ void opt_array2variable(Vector *vec){
     }
   }
 
-  for(int i=1;i<=label_cnt;++i) if(in_list[i] && ic[i]){
+  for(int i=1;i<=old_label_cnt;++i) if(in_list[i] && ic[i]){
     free(nl[i]);
   }
 
