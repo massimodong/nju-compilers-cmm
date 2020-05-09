@@ -99,14 +99,23 @@ void opt_function_expand(Vector *vec){
 
   SymTabEntry *curFun = NULL;
 
+  int not_defined_cnt = 0;
+
   for(int i=0;i<vec->len;++i){
     if(vec->data[i].op == OP_FUNCTION){
+      SymTabEntry *lastFun = curFun;
       curFun = malloc(sizeof(SymTabEntry));
       curFun->name = vec->data[i].src1_var;
       curFun->depth = 0;
       curFun->paramList = newList();
       curFun->defined = 0;
       trieInsert(&Fn, curFun->name, curFun);
+
+      if(lastFun){
+        if(!lastFun->defined) ++not_defined_cnt;
+      }
+
+      if(not_defined_cnt > 10) curFun->defined = 1;
     }else if(vec->data[i].op == OP_PARAM){
       listAppend(curFun->paramList, vec->data + i);
     }else if(vec->data[i].op == OP_FUNCALL){
