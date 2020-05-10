@@ -14,7 +14,6 @@ static int new_label(int l){
   assert(x);
   assert(x <= label_cnt);
   if(o >= max_off[x]){
-    printf("Warning: index out of bound detected\n");
     return ++label_cnt; //UB: index out of bound 
   }
   if(nl[x][o] == 0){
