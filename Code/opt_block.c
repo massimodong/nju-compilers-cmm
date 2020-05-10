@@ -180,6 +180,11 @@ static void opt_work(Vector *vec){
                 if(has_src2(irc)) active[irc.src2] = 1;
               }
             }
+            for(int j=t;j<=b;++j){
+              for(int k=0;k<block_list_len[j];++k){
+                active[block_list[j][k]] = 1;
+              }
+            }
           }
         }
     }

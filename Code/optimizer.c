@@ -48,6 +48,8 @@ void irOptimize(Vector *vec){
     opt_goto(vec);
     opt_simplify_each_code(vec);
     opt_array2variable(vec);
+    //opt_block(vec);
+    //opt_goto(vec);
     if(vector_eq(ov, vec)){
       vector_free(ov);
       break;
