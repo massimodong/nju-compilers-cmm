@@ -91,7 +91,8 @@ static int get_constant_val(IRCode irc){
     case OP_MUL:
       return lv * rv;
     case OP_DIV:
-      return lv / rv;
+      if(rv == 0) return 0;
+      else return lv / rv;
     case OP_ARG:
     case OP_WRITE:
     case OP_RETURN:

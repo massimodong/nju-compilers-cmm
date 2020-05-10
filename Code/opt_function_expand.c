@@ -149,7 +149,7 @@ void opt_function_expand(Vector *vec){
     }else if(vec->data[i].op == OP_FUNCALL){
       SymTabEntry *e = trieQuery(Fn, vec->data[i].src1_var);
       assert(e);
-      if(isFun(vec->data[i].src1_var)){
+      if(isFun(vec->data[i].src1_var)/* && strcmp(curFun->name, "main") != 0*/){
         vec_pb(nv, vec->data[i]);
         for(ListNode *n = e->paramList->head;n;n=n->next) listPopRear(&argStack);
       }else{

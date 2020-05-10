@@ -54,5 +54,6 @@ void irOptimize(Vector *vec){
     }else{
       vector_free(ov);
     }
+    //printf("epoch %d\n", i);
   }
 }
