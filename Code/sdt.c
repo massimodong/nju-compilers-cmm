@@ -6,7 +6,9 @@
 
 //#define PRINTREGISTERS 1
 
+int compile_success = 1;
 void sdd_error_lineno(int n, const char *msg, int lineno){
+  compile_success = 0;
   printf("Error type %d at Line %d: %s.\n", n, lineno, msg);
 }
 
@@ -314,7 +316,7 @@ void resolveExtDef(Tree *t){
           registerVariable(p->name, p->type, t->lineno);
         }
         resolveCompSt(t->ch[2]);
-        irFunc(t);
+        if(compile_success) irFunc(t);
       }
       symTabStackPop();
       break;
