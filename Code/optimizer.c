@@ -33,7 +33,17 @@ static int vector_eq(Vector *a, Vector *b){
   return 1;
 }
 
+/*
+ * We don't need any optimization anymore in Lab4!
+ * So we don't use any optimization
+ * TODO: Bugs to be fixed:
+ * For some function calls, `opt_nonreachable` will detect that some corresponding `ARG` statemets are nonreachable and thus are removed,
+ *   but it can not detect that the `FUNCALL` statement is nonreachable as well, and thus is remained.
+ *   This is somehow OK, because the `FUNCALL` statement will never be reached.
+ *   But in the case that we apply function inline (`opt_function_expand`), the remaining `FUNCALL` will cause Segment Fault, since it's args are missing.
+ */
 void irOptimize(Vector *vec){
+  return;
   int i = 0;
   opt_goto(vec);
   for(;i<50;++i){
