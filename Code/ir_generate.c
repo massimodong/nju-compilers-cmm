@@ -684,7 +684,7 @@ void irInit(){
 
 void irFinish(){
   irOptimize(ir_code);
-  printIRCode();
+  //printIRCode();
   printMIPS(ir_code);
 }
 

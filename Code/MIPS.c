@@ -54,6 +54,7 @@ static void find_variables(Vector *vec, int s){
     switch(irc.op){
       case OP_LABEL:
       case OP_FUNCTION:
+      case OP_GOTO:
         break;
 
       case OP_PARAM:
@@ -206,6 +207,29 @@ static void translateStmt(IRCode irc){
       savedst(irc, "$t0");
       break;
 
+    case OP_SUB:
+      loads1(irc);
+      loads2(irc);
+      fprintf(fir, "  sub $t0, $t1, $t2\n");
+      savedst(irc, "$t0");
+      break;
+
+    case OP_MUL:
+      loads1(irc);
+      loads2(irc);
+      fprintf(fir, "  mult $t1, $t2\n");
+      fprintf(fir, "  mflo $t0\n");
+      savedst(irc, "$t0");
+      break;
+
+    case OP_DIV:
+      loads1(irc);
+      loads2(irc);
+      fprintf(fir, "  div $t1, $t2\n");
+      fprintf(fir, "  mflo $t0\n");
+      savedst(irc, "$t0");
+      break;
+
     case OP_RETURN:
       loads1(irc);
       fprintf(fir, "  move $v0, $t1\n");
@@ -216,8 +240,8 @@ static void translateStmt(IRCode irc){
       fprintf(fir, "  jr $ra\n");
       break;
 
-    //default:
-    //  assert(0);
+    default:
+      assert(0);
   }
 }
 
