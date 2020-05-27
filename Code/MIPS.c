@@ -8,14 +8,9 @@ extern int label_cnt;
 
 static const char *START_TEXT[] = {
   ".data",
+  "_ret: .asciiz \"\\n\"",
   ".globl main",
   ".text",
-  "read:",
-  "  jr $ra",
-  "",
-  "write:",
-  "  jr $ra",
-  "",
 };
 #define START_TEXT_LEN (sizeof(START_TEXT)/sizeof(char *))
 
@@ -166,11 +161,19 @@ static void translateStmt(IRCode irc){
       break;
 
     case OP_READ:
-      //TODO
+      fprintf(fir, "  li $v0, 5\n");
+      fprintf(fir, "  syscall\n");
+      savedst(irc, "$v0");
       break;
 
     case OP_WRITE:
-      //TODO
+      loads1(irc);
+      fprintf(fir, "  move $a0, $t1\n");
+      fprintf(fir, "  li $v0, 1\n");
+      fprintf(fir, "  syscall\n");
+      fprintf(fir, "  la $a0, _ret\n");
+      fprintf(fir, "  li $v0, 4\n");
+      fprintf(fir, "  syscall\n");
       break;
 
     case OP_ASSIGN:
