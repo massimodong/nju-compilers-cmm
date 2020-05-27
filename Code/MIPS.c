@@ -200,6 +200,50 @@ static void translateStmt(IRCode irc){
       savedst(irc, "$t0");
       break;
 
+    case OP_GOTO:
+      fprintf(fir, "  j label%d\n", irc.dst);
+      break;
+
+    case OP_IFG_GOTO:
+      loads1(irc);
+      loads2(irc);
+      fprintf(fir, "  sub $t0, $t1, $t2\n");
+      fprintf(fir, "  bgtz $t0, label%d\n", irc.dst);
+      break;
+
+    case OP_IFL_GOTO:
+      loads1(irc);
+      loads2(irc);
+      fprintf(fir, "  sub $t0, $t1, $t2\n");
+      fprintf(fir, "  bltz $t0, label%d\n", irc.dst);
+      break;
+
+    case OP_IFGE_GOTO:
+      loads1(irc);
+      loads2(irc);
+      fprintf(fir, "  sub $t0, $t1, $t2\n");
+      fprintf(fir, "  bgez $t0, label%d\n", irc.dst);
+      break;
+
+    case OP_IFLE_GOTO:
+      loads1(irc);
+      loads2(irc);
+      fprintf(fir, "  sub $t0, $t1, $t2\n");
+      fprintf(fir, "  blez $t0, label%d\n", irc.dst);
+      break;
+
+    case OP_IFEQ_GOTO:
+      loads1(irc);
+      loads2(irc);
+      fprintf(fir, "  beq $t1, $t2, label%d\n", irc.dst);
+      break;
+
+    case OP_IFNE_GOTO:
+      loads1(irc);
+      loads2(irc);
+      fprintf(fir, "  bne $t1, $t2, label%d\n", irc.dst);
+      break;
+
     case OP_ADD:
       loads1(irc);
       loads2(irc);
