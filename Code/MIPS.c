@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 extern FILE *fir;
 extern int label_cnt;
@@ -61,8 +62,8 @@ static void find_variables(Vector *vec, int s){
         break;
 
       case OP_DEC:
-        var_pos[irc.src1] = -(pos_cnt + 1);
         pos_cnt += irc.src2/4;
+        var_pos[irc.src1] = -pos_cnt;
         var_status[irc.src1] = 1;
         break;
 
@@ -179,6 +180,23 @@ static void translateStmt(IRCode irc){
     case OP_ASSIGN:
       loads1(irc);
       savedst(irc, "$t1");
+      break;
+
+    case OP_GETADDR:
+      fprintf(fir, "  addi $t0, $fp, %d\n", var_pos[irc.src1]);
+      savedst(irc, "$t0");
+      break;
+
+    case OP_PUTADDR:
+      loads1(irc);
+      loads2(irc);
+      fprintf(fir, "  sw $t1, 0($t2)\n");
+      break;
+
+    case OP_GETFROMADDR:
+      loads1(irc);
+      fprintf(fir, "  lw $t0, 0($t1)\n");
+      savedst(irc, "$t0");
       break;
 
     case OP_ADD:
