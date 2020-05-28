@@ -9,6 +9,7 @@ extern int label_cnt;
 
 static const char *START_TEXT[] = {
   ".data",
+  "_prompt: .asciiz \"Please input an integer:\\n\"",
   "_ret: .asciiz \"\\n\"",
   ".globl main",
   ".text",
@@ -163,6 +164,10 @@ static void translateStmt(IRCode irc){
       break;
 
     case OP_READ:
+      //fprintf(fir, "  la $a0, _prompt\n");
+      //fprintf(fir, "  li $v0, 4\n");
+      //fprintf(fir, "  syscall\n");
+
       fprintf(fir, "  li $v0, 5\n");
       fprintf(fir, "  syscall\n");
       savedst(irc, "$v0");
